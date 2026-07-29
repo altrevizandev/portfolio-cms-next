@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../prisma/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id Int @id @default(autoincrement())
+
+  name String
+  email String @unique
+  password String
+  first_login Boolean @default(true)
+
+  account_roles AccountRoles[]
+  login_codes LoginCode[]
+  password_reset_token PasswordResetToken[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("account")
+}
+
+model LoginCode {
+  id Int @id @default(autoincrement())
+
+  code_hash String
+  expires_at DateTime
+  used_at DateTime?
+
+  account Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
+  account_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([account_id])
+  @@map("login_codes")
+}
+
+model PasswordResetToken {
+  id Int @id @default(autoincrement())
+
+  token_hash String
+  expires_at DateTime
+  used_at DateTime?
+
+  account Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
+  account_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([account_id])
+  @@unique([token_hash])
+  @@map("password_reset_tokens")
+}
+
+model Role {
+  id Int @id @default(autoincrement())
+
+  name String
+  slug String @unique
+
+  account_roles AccountRoles[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model AccountRoles {
+  id Int @id @default(autoincrement())
+
+  account Account @relation(references: [id], fields: [account_id])
+  role Role @relation(references: [id], fields: [role_id])
+
+  account_id Int
+  role_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([account_id, role_id])
+
+  @@map("account_roles")
+}

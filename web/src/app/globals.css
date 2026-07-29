@@ -1,0 +1,179 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-manrope);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Base */
+  --background: #fcfbfa;
+  --foreground: #211d1e;
+
+  --card: #ffffff;
+  --card-foreground: #211d1e;
+
+  --popover: #ffffff;
+  --popover-foreground: #211d1e;
+
+  /* Identidade */
+  --primary: #c8102e;
+  --primary-foreground: #ffffff;
+
+  --secondary: #176b3a;
+  --secondary-foreground: #ffffff;
+
+  /* Neutros quentes */
+  --muted: #f3f0ef;
+  --muted-foreground: #686062;
+
+  /* Accent */
+  --accent: #f8e8eb;
+  --accent-foreground: #8f1028;
+
+  /* Estados */
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+
+  --border: #e4dedf;
+  --input: #ddd5d7;
+  --ring: #c8102e;
+
+  --radius: .75rem;
+
+  /* Sidebar */
+  --sidebar: #f8f6f5;
+  --sidebar-foreground: #211d1e;
+
+  --sidebar-primary: #c8102e;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #f3e8ea;
+  --sidebar-accent-foreground: #8f1028;
+
+  --sidebar-border: #e4dedf;
+  --sidebar-ring: #c8102e;
+
+  /* Charts */
+  --chart-1: #c8102e;
+  --chart-2: #176b3a;
+  --chart-3: #7c3aed;
+  --chart-4: #d97706;
+  --chart-5: #334155;
+
+  --success: #176b3a;
+  --warning: #d97706;
+  --info: #2563eb;
+  --danger: #b91c1c;
+
+  --surface: #ffffff;
+  --surface-muted: #f8f6f5;
+}
+
+.dark {
+  --background: #121011;
+  --foreground: #f8f4f5;
+
+  --card: #1b1819;
+  --card-foreground: #f8f4f5;
+
+  --popover: #211d1e;
+  --popover-foreground: #f8f4f5;
+
+  --primary: #f04464;
+  --primary-foreground: #21070d;
+
+  --secondary: #3aa667;
+  --secondary-foreground: #061a0e;
+
+  --muted: #292426;
+  --muted-foreground: #b9afb2;
+
+  --accent: #351b21;
+  --accent-foreground: #ffb3c1;
+
+  --destructive: #f05252;
+  --destructive-foreground: #210707;
+
+  --border: #3b3436;
+  --input: #463d40;
+  --ring: #f04464;
+
+  --sidebar: #181516;
+  --sidebar-foreground: #f8f4f5;
+
+  --sidebar-primary: #f04464;
+  --sidebar-primary-foreground: #21070d;
+
+  --sidebar-accent: #351b21;
+  --sidebar-accent-foreground: #ffb3c1;
+
+  --sidebar-border: #3b3436;
+  --sidebar-ring: #f04464;
+
+  --chart-1: #f04464;
+  --chart-2: #3aa667;
+  --chart-3: #a78bfa;
+  --chart-4: #fbbf24;
+  --chart-5: #cbd5e1;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+  html {
+    @apply font-sans;
+    }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+    }
+}
