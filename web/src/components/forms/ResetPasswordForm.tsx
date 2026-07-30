@@ -109,7 +109,7 @@ export const ResetPasswordForm = () => {
   return (
     <Card className="flex-1 max-w-112.5 md:m-auto">
       <CardHeader className='flex flex-col gap-2 items-center'>
-        <CardTitle className='text-2xl'>Tirol Abatimentos</CardTitle>
+        <CardTitle className='text-2xl'>Portfolio CMS</CardTitle>
         <CardDescription>
           Altere sua senha para continuar
         </CardDescription>

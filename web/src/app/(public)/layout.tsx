@@ -6,10 +6,10 @@ import { RecaptchaBadgeVisible } from "@/components/security/RecaptchaCleanup";
 
 export const metadata: Metadata = {
   title: {
-    default: "Tirol - Portal Abatimentos",
-    template: `%s - Tirol - Portal Abatimentos`,
+    default: "André Lucas Trevizan — Software Developer",
+    template: `%s — André Lucas Trevizan`,
   },
-  description: "Portal para solicitação de abatimentos na Tirol",
+  description: "Portfólio de André Lucas Trevizan, desenvolvedor de software.",
   icons: {
     icon: "/favicon.ico",
   },

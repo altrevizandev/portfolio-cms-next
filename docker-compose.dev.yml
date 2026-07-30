@@ -1,59 +1,88 @@
+name: portfolio-dev
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ${CONTAINER_DEV_DB}
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: always
-    env_file:
-      - dev.env
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:5432"
-
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
-      - app-network
+      - internal
+
   api:
     build:
       context: ./api
       target: dev
-    container_name: ${CONTAINER_DEV_API}
-    ports:
-      - "${CONTAINER_DEV_API_PORT}:3333"
-    env_file:
-      - dev.env
+    restart: unless-stopped
+    init: true
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - CHOKIDAR_USEPOLLING=${CHOKIDAR_USEPOLLING}
-      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
-    healthcheck:
-      test: [ "CMD-SHELL", "node -e \"fetch('http://localhost:3333/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\"" ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
+      NODE_ENV: development
+      PORT: 3333
+      DATABASE_URL: ${DATABASE_URL}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/recaptcha-auth.json
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-true}
+    env_file:
+      - ./api/.env
+    ports:
+      - "${API_PORT:-3333}:3333"
     volumes:
       - ./api:/usr/src/app
-      - /usr/src/app/node_modules
+      - api_node_modules:/usr/src/app/node_modules
       - ./uploads:/usr/src/app/uploads
-      - ./google/portfolio-503912-4fe214e7a78c.json:/run/secrets/recaptcha-auth.json:ro
+      - ${RECAPTCHA_CREDENTIALS_FILE:-./google/portfolio-504013-5d6347d410cb.json}:/run/secrets/recaptcha-auth.json:ro
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "node -e \"fetch('http://localhost:3333/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
     networks:
-      - app-network
+      - internal
+
+  web:
+    build:
+      context: ./web
+      target: dev
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: development
+      API_INTERNAL_URL: http://api:3333
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3333}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      WATCHPACK_POLLING: ${CHOKIDAR_USEPOLLING:-true}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ./web:/usr/src/app
+      - web_node_modules:/usr/src/app/node_modules
+      - web_next_cache:/usr/src/app/.next
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - internal
 
 volumes:
-  postgres_data:
+  postgres_dev_data:
+  api_node_modules:
+  web_node_modules:
+  web_next_cache:
 
 networks:
-  app-network:
+  internal:
     driver: bridge

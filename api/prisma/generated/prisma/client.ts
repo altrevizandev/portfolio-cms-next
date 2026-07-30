@@ -66,3 +66,43 @@ export type Role = Prisma.RoleModel
  * 
  */
 export type AccountRoles = Prisma.AccountRolesModel
+/**
+ * Model Homepage
+ * 
+ */
+export type Homepage = Prisma.HomepageModel
+/**
+ * Model Experience
+ * 
+ */
+export type Experience = Prisma.ExperienceModel
+/**
+ * Model Education
+ * 
+ */
+export type Education = Prisma.EducationModel
+/**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model ProjectImage
+ * 
+ */
+export type ProjectImage = Prisma.ProjectImageModel
+/**
+ * Model Stack
+ * 
+ */
+export type Stack = Prisma.StackModel
+/**
+ * Model ProjectStack
+ * 
+ */
+export type ProjectStack = Prisma.ProjectStackModel
+/**
+ * Model Testimonial
+ * 
+ */
+export type Testimonial = Prisma.TestimonialModel

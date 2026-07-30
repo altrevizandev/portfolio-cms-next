@@ -18,7 +18,6 @@ import {
 } from "../ui/alert";
 import { SignedAccount, useSignedAccount } from '../../../store/signedAccount';
 import { Separator } from '../ui/separator';
-import Image from 'next/image';
 import { InputGroup, InputGroupButton, InputGroupInput } from '../ui/input-group';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
@@ -48,13 +47,7 @@ export type ApiErrorData = {
   message: string
 }
 
-type SignInFormProps = {
-  toggleForm: () => void;
-}
-
-export const SignInForm = ({
-  toggleForm
-}: SignInFormProps) => {
+export const SignInForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
@@ -127,10 +120,6 @@ export const SignInForm = ({
 
         setSignedAccount(account);
 
-        if (account.first_login) {
-          return router.replace("/change-password");
-        }
-
         return router.replace("/");
       }
 
@@ -178,14 +167,7 @@ export const SignInForm = ({
   return (
     <Card className="md:m-auto max-w-100 flex-1">
       <CardHeader className='flex items-center justify-center'>
-        <CardTitle>
-          <Image
-            width={100}
-            height={100}
-            src="/images/logo_tirol_abatimentos.png"
-            alt='Logo portal'
-          />
-        </CardTitle>
+        <CardTitle className="text-2xl">Portfolio CMS</CardTitle>
       </CardHeader>
       <Separator />
       <CardContent>
@@ -325,16 +307,11 @@ export const SignInForm = ({
               {twoFactorRequired ? "Validar codigo" : "Entrar"}
             </Button>
             {!twoFactorRequired && (
-              <>
-                <Button type="button" className="w-full" onClick={() => toggleForm()}>
-                  Acessar pela primeira vez
+              <Link href="/auth/check-account">
+                <Button variant={'link'}>
+                  Esqueci minha senha
                 </Button>
-                <Link href="/auth/check-account">
-                  <Button variant={'link'}>
-                    Esqueci minha senha
-                  </Button>
-                </Link>
-              </>
+              </Link>
             )}
             {twoFactorRequired && (
               <Button type="button" variant="link" onClick={() => setTwoFactorRequired(false)}>

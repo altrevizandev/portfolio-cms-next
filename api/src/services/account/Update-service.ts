@@ -60,7 +60,6 @@ export class AccountUpdateService {
       name: account.name,
       email: account.email,
       role: role.slug,
-      first_login: account.first_login,
       created_at: account.created_at,
       updated_at: account.updated_at,
     }

@@ -22,14 +22,5 @@ export class ChangePasswordService {
     this.accountRepository.password = this.password;
 
     await this.accountRepository.changePassword();
-
-    return {
-      id: account.id,
-      name: account.name,
-      email: account.email,
-      first_login: account.first_login,
-      created_at: account.created_at,
-      updated_at: account.updated_at
-    };
   }
 }

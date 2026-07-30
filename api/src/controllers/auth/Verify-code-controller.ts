@@ -35,13 +35,17 @@ export class VerifyCodeController {
       expiresIn: '1h'
     });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     return reply.code(200).cookie('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV == "production" ? true : false,
-      sameSite: process.env.NODE_ENV == "production" ? "none" : "lax",
-      maxAge: 60 * 60 * 1000,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 60 * 60,
       path: '/',
-      domain: process.env.NODE_ENV == "production" ? ".altrevizan.com.br" : "localhost",
+      ...(isProduction && {
+        domain: ".altrevizan.com.br",
+      }),
     }).send({
       account,
     });

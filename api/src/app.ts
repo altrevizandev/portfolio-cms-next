@@ -14,8 +14,11 @@ import fastifySwagger from '@fastify/swagger';
 import { router } from './router.js';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifyCookie from '@fastify/cookie';
+import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
 import * as dotenv from "dotenv";
 import { ApiError } from './utils/ApiError.js';
+import { uploadsDirectory } from './utils/uploads.js';
 
 dotenv.config({ path: ".env" });
 
@@ -38,6 +41,19 @@ export class App {
 
   private async registerPlugins() {
     await this.app.register(fastifyCookie, {});
+
+    await this.app.register(fastifyMultipart, {
+      limits: {
+        fields: 20,
+        files: 11,
+        fileSize: 5 * 1024 * 1024,
+      },
+    });
+
+    await this.app.register(fastifyStatic, {
+      root: uploadsDirectory,
+      prefix: "/uploads/",
+    });
 
     await this.app.register(fastifyCors, {
       origin: true,

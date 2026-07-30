@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Spinner } from '../ui/spinner';
 import {
@@ -16,7 +15,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "../ui/alert";
-import { SignedAccount, useSignedAccount } from '../../../store/signedAccount';
 import { Separator } from '../ui/separator';
 import { InputGroup, InputGroupButton, InputGroupInput } from '../ui/input-group';
 
@@ -32,28 +30,18 @@ const changePasswordSchema = z
 
 type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-type ChangePasswordAPIResponse = {
-  account: SignedAccount
-}
-
 export type ApiErrorData = {
   status: string,
   message: string
 }
 
 export const ChangePasswordForm = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [apiError, setApiError] = useState<ApiErrorData>({
     message: "",
     status: ""
   });
-
-  const {
-    account,
-    setSignedAccount
-  } = useSignedAccount();
 
   const router = useRouter();
 
@@ -74,7 +62,6 @@ export const ChangePasswordForm = () => {
   }
 
   const onSubmit = async (data: ChangePasswordFormData) => {
-    setIsSubmitting(true);
     setApiError({
       message: "",
       status: ""
@@ -99,25 +86,16 @@ export const ChangePasswordForm = () => {
         return;
       }
 
-      if (account) {
-        setSignedAccount({
-          ...account,
-          first_login: false,
-        });
-      }
-
       return router.replace("/");
     } catch (error) {
       console.log(error);
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
   return (
     <Card className="flex-1 max-w-112.5 md:m-auto">
       <CardHeader className='flex flex-col gap-2 items-center'>
-        <CardTitle className='text-2xl'>Tirol Abatimentos</CardTitle>
+        <CardTitle className='text-2xl'>Portfolio CMS</CardTitle>
         <CardDescription>
           Altere sua senha para continuar
         </CardDescription>

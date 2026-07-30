@@ -11,10 +11,17 @@ interface NodemailerError extends Error {
 }
 
 export class SendEmailService {
-  public from: string = "";
+  public from: string = process.env.MAIL_FROM
+    || `André Lucas Trevizan <${process.env.MAIL_AUTH ?? ""}>`;
   public to: string = "";
   public subject: string = "";
   public html: string = "";
+  public replyTo: string = "";
+  public attachments: Array<{
+    filename: string;
+    content: Buffer;
+    contentType: string;
+  }> = [];
   public template: string = "";
   public templateData: Record<string, unknown> = {};
   private readonly transporter: Transporter;
@@ -23,7 +30,7 @@ export class SendEmailService {
     this.transporter = createTransport({
       host: String(process.env.MAIL_HOST),
       port: Number(process.env.MAIL_PORT),
-      secure: Boolean(process.env.MAIL_SECURE),
+      secure: process.env.MAIL_SECURE === "true",
       pool: true,
       maxConnections: 1,
       maxMessages: 5,
@@ -43,8 +50,10 @@ export class SendEmailService {
       await this.transporter.sendMail({
         from: this.from,
         to: this.to,
+        replyTo: this.replyTo || undefined,
         subject: this.subject,
-        html: this.html
+        html: this.html,
+        attachments: this.attachments,
       });
     } catch (error: unknown) {
       const err = error as NodemailerError;

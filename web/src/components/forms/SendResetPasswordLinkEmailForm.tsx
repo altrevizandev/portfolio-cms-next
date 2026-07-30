@@ -16,7 +16,6 @@ import {
   AlertTitle,
 } from "../ui/alert";
 import { Separator } from '../ui/separator';
-import Image from 'next/image';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { executeRecaptcha } from '@/lib/recaptcha';
@@ -96,14 +95,7 @@ export const SendResetPasswordLinkEmailForm = () => {
   return (
     <Card className="md:m-auto max-w-100 flex-1">
       <CardHeader className='flex items-center justify-center'>
-        <CardTitle>
-          <Image
-            width={100}
-            height={100}
-            src="/images/logo_tirol_abatimentos.png"
-            alt='Logo portal'
-          />
-        </CardTitle>
+        <CardTitle className="text-2xl">Portfolio CMS</CardTitle>
       </CardHeader>
       <Separator />
       <CardContent>

@@ -81,8 +81,6 @@ export async function AuthRoutes(
               name: z.string(),
               email: z.email(),
               role: z.string(),
-              cnpj_root: z.string(),
-              first_login: z.boolean(),
               created_at: z.date(),
               updated_at: z.date(),
             })
@@ -104,7 +102,7 @@ export async function AuthRoutes(
       return verifyCodeController.handle(request as FastifyRequest<VerifyCodeRequest>, reply);
     }
   );
-  
+
   fastify.post(
     "/auth/send-reset-password-link",
     {
@@ -153,8 +151,6 @@ export async function AuthRoutes(
               name: z.string(),
               email: z.email(),
               role: z.string(),
-              cnpj_root: z.string(),
-              first_login: z.boolean(),
               created_at: z.date(),
               updated_at: z.date(),
             })

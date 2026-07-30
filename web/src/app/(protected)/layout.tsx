@@ -6,10 +6,10 @@ import { RecaptchaCleanup } from "@/components/security/RecaptchaCleanup";
 
 export const metadata: Metadata = {
   title: {
-    default: "Tirol - Portal Abatimentos",
-    template: `%s - Tirol - Portal Abatimentos`,
+    default: "Área administrativa — André Lucas Trevizan",
+    template: `%s — André Lucas Trevizan`,
   },
-  description: "Portal para solicitação de abatimentos na Tirol",
+  description: "Gerenciamento de conteúdo do portfólio de André Lucas Trevizan.",
   icons: {
     icon: "/favicon.ico",
   },

@@ -6,8 +6,6 @@ export type SignedAccount = {
   name: string;
   email: string;
   role: string;
-  cnpj_root: string;
-  first_login: boolean;
 }
 
 type SignedAccountStore = {
@@ -21,7 +19,7 @@ type SignedAccountStore = {
 
 export const useSignedAccount = create<SignedAccountStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       account: null,
       isSigned: false,
       setSignedAccount: (data: SignedAccount) => set({

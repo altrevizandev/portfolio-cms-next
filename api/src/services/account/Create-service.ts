@@ -53,7 +53,7 @@ export class CreateAccountService {
     const sendEmailService = new SendEmailService();
 
     sendEmailService.from = process.env.MAIL_FROM!;
-    sendEmailService.subject = "Portfólio André Lucas Trevizan - Criação de Conta";
+    sendEmailService.subject = "Bem-vindo ao CMS | Portfólio André Lucas Trevizan";
     sendEmailService.to = this.email;
     sendEmailService.template = "account-created";
     sendEmailService.templateData = {

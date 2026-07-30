@@ -37,13 +37,14 @@ export class SendResetPasswordLinkService {
     const sendEmailService = new SendEmailService();
     
     sendEmailService.from = process.env.MAIL_FROM!;
-    sendEmailService.subject = "Abatimentos Tirol - Atualização de Senha";
+    sendEmailService.subject = "Redefinição de senha | Portfólio André Lucas Trevizan";
     sendEmailService.to = this.email;
     sendEmailService.template = "reset-password";
     sendEmailService.templateData = {
       account,
       token,
-      portal_url: process.env.PORTAL_URL ?? "https://abatimentos.tirol.com.br",
+      portal_url: process.env.PORTAL_URL ?? "https://altrevizan.com.br",
+      expires_in_minutes: expiresInMinutes,
     };
 
     await sendEmailService.execute();

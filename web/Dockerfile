@@ -9,13 +9,23 @@ RUN corepack enable \
 
 RUN pnpm install --frozen-lockfile --config.minimum-release-age=0
 
+FROM base AS dev
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
+
 FROM base AS build
 
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ARG NEXT_PUBLIC_SITE_URL
 
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 COPY . .
 

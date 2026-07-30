@@ -15,13 +15,12 @@ datasource db {
 model Account {
   id Int @id @default(autoincrement())
 
-  name String
-  email String @unique
+  name        String
+  email       String  @unique
   password String
-  first_login Boolean @default(true)
 
-  account_roles AccountRoles[]
-  login_codes LoginCode[]
+  account_roles        AccountRoles[]
+  login_codes          LoginCode[]
   password_reset_token PasswordResetToken[]
 
   created_at DateTime @default(now())
@@ -33,11 +32,11 @@ model Account {
 model LoginCode {
   id Int @id @default(autoincrement())
 
-  code_hash String
+  code_hash  String
   expires_at DateTime
-  used_at DateTime?
+  used_at    DateTime?
 
-  account Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
+  account    Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
   account_id Int
 
   created_at DateTime @default(now())
@@ -52,16 +51,16 @@ model PasswordResetToken {
 
   token_hash String
   expires_at DateTime
-  used_at DateTime?
+  used_at    DateTime?
 
-  account Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
+  account    Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
   account_id Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@index([account_id])
   @@unique([token_hash])
+  @@index([account_id])
   @@map("password_reset_tokens")
 }
 
@@ -82,16 +81,176 @@ model Role {
 model AccountRoles {
   id Int @id @default(autoincrement())
 
-  account Account @relation(references: [id], fields: [account_id])
-  role Role @relation(references: [id], fields: [role_id])
+  account Account @relation(references: [id], fields: [account_id], onDelete: Cascade)
+  role    Role    @relation(references: [id], fields: [role_id], onDelete: Cascade)
 
   account_id Int
-  role_id Int
+  role_id    Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@unique([account_id, role_id])
-
+  @@index([role_id])
   @@map("account_roles")
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Homepage {
+  id Int @id @default(1)
+
+  headline        String
+  subheadline     String?
+  biography       String
+  primary_photo   String?
+  secondary_photo String?
+  email           String?
+  github_url      String?
+  linkedin_url    String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("homepage")
+}
+
+model Experience {
+  id String @id @default(uuid())
+
+  company     String
+  role        String
+  description String
+  start_date  DateTime
+  end_date    DateTime?
+  current     Boolean   @default(false)
+  sort_order  Int       @default(0)
+  published   Boolean   @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([published, sort_order])
+  @@map("experiences")
+}
+
+model Education {
+  id String @id @default(uuid())
+
+  institution String
+  course      String
+  degree      String?
+  description String?
+  start_date  DateTime
+  end_date    DateTime?
+  current     Boolean   @default(false)
+  sort_order  Int       @default(0)
+  published   Boolean   @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([published, sort_order])
+  @@map("education")
+}
+
+model Project {
+  id String @id @default(uuid())
+
+  thumbnail    String
+  title        String
+  slug         String            @unique
+  description  String
+  objective    String
+  challenge    String?
+  status       PublicationStatus @default(DRAFT)
+  published_at DateTime?
+  featured     Boolean           @default(false)
+  sort_order   Int               @default(0)
+
+  images ProjectImage[]
+  stacks ProjectStack[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([status, featured, sort_order, published_at])
+  @@map("projects")
+}
+
+model ProjectImage {
+  id String @id @default(uuid())
+
+  path       String
+  alt_text   String?
+  sort_order Int     @default(0)
+
+  project    Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project_id String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([project_id, sort_order])
+  @@index([project_id])
+  @@map("project_images")
+}
+
+model Stack {
+  id String @id @default(uuid())
+
+  name      String
+  slug      String  @unique
+  icon_slug String?
+  color     String?
+  website   String?
+
+  projects ProjectStack[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("stacks")
+}
+
+model ProjectStack {
+  project_id String
+  stack_id   String
+
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  stack   Stack   @relation(fields: [stack_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  @@id([project_id, stack_id])
+  @@index([stack_id])
+  @@map("project_stacks")
+}
+
+model Testimonial {
+  id String @id @default(uuid())
+
+  author_name String
+  author_role String?
+  company     String?
+  avatar      String?
+  content     String
+  status      TestimonialStatus @default(PENDING)
+  approved_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([status])
+  @@map("testimonials")
 }

@@ -84,24 +84,6 @@ export class AccountRepository {
     return account;
   }
 
-  public async changeFirstLogin() {
-    await this.prismaClient.account.update({
-      where: { id: this.account_id },
-      data: {
-        first_login: false,
-      }
-    });
-  }
-  
-  public async firstLoginTrue() {
-    await this.prismaClient.account.update({
-      where: { id: this.account_id },
-      data: {
-        first_login: true,
-      }
-    });
-  }
-
   public async list() {
     const accounts = await this.prismaClient.accountRoles.findMany({
       include: {

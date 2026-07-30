@@ -59,13 +59,13 @@ export class SignInService {
 
     sendEmailService.from = process.env.MAIL_FROM!;
     sendEmailService.to = account.email;
-    sendEmailService.subject = "Abatimentos Tirol - Codigo de acesso";
+    sendEmailService.subject = "Seu código de acesso | Portfólio André Lucas Trevizan";
     sendEmailService.template = "login-code";
     sendEmailService.templateData = {
       account,
       code,
       expires_in_minutes: expiresInMinutes,
-      portal_url: process.env.PORTAL_URL ?? "https://abatimentos.tirol.com.br",
+      portal_url: process.env.PORTAL_URL ?? "https://altrevizan.com.br",
     };
 
     await sendEmailService.execute();

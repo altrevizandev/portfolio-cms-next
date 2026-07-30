@@ -33,7 +33,6 @@ export class ConfirmResetPasswordService {
     this.accountRepository.account_id = resetPasswordToken.account.id;
 
     await this.accountRepository.changePassword();
-    await this.accountRepository.changeFirstLogin();
 
     this.resetPasswordTokenRepository.password_reset_token_id = resetPasswordToken.id;
 

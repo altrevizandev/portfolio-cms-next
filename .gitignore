@@ -69,6 +69,8 @@ web_modules/
 .env
 .env.*
 !.env.example
+.prod.env
+.staging.env
 
 # Google Cloud service account credentials
 google/*.json

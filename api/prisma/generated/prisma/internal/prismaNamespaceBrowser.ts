@@ -55,7 +55,15 @@ export const ModelName = {
   LoginCode: 'LoginCode',
   PasswordResetToken: 'PasswordResetToken',
   Role: 'Role',
-  AccountRoles: 'AccountRoles'
+  AccountRoles: 'AccountRoles',
+  Homepage: 'Homepage',
+  Experience: 'Experience',
+  Education: 'Education',
+  Project: 'Project',
+  ProjectImage: 'ProjectImage',
+  Stack: 'Stack',
+  ProjectStack: 'ProjectStack',
+  Testimonial: 'Testimonial'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -79,7 +87,6 @@ export const AccountScalarFieldEnum = {
   name: 'name',
   email: 'email',
   password: 'password',
-  first_login: 'first_login',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -133,6 +140,129 @@ export const AccountRolesScalarFieldEnum = {
 } as const
 
 export type AccountRolesScalarFieldEnum = (typeof AccountRolesScalarFieldEnum)[keyof typeof AccountRolesScalarFieldEnum]
+
+
+export const HomepageScalarFieldEnum = {
+  id: 'id',
+  headline: 'headline',
+  subheadline: 'subheadline',
+  biography: 'biography',
+  primary_photo: 'primary_photo',
+  secondary_photo: 'secondary_photo',
+  email: 'email',
+  github_url: 'github_url',
+  linkedin_url: 'linkedin_url',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type HomepageScalarFieldEnum = (typeof HomepageScalarFieldEnum)[keyof typeof HomepageScalarFieldEnum]
+
+
+export const ExperienceScalarFieldEnum = {
+  id: 'id',
+  company: 'company',
+  role: 'role',
+  description: 'description',
+  start_date: 'start_date',
+  end_date: 'end_date',
+  current: 'current',
+  sort_order: 'sort_order',
+  published: 'published',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ExperienceScalarFieldEnum = (typeof ExperienceScalarFieldEnum)[keyof typeof ExperienceScalarFieldEnum]
+
+
+export const EducationScalarFieldEnum = {
+  id: 'id',
+  institution: 'institution',
+  course: 'course',
+  degree: 'degree',
+  description: 'description',
+  start_date: 'start_date',
+  end_date: 'end_date',
+  current: 'current',
+  sort_order: 'sort_order',
+  published: 'published',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type EducationScalarFieldEnum = (typeof EducationScalarFieldEnum)[keyof typeof EducationScalarFieldEnum]
+
+
+export const ProjectScalarFieldEnum = {
+  id: 'id',
+  thumbnail: 'thumbnail',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  objective: 'objective',
+  challenge: 'challenge',
+  status: 'status',
+  published_at: 'published_at',
+  featured: 'featured',
+  sort_order: 'sort_order',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const ProjectImageScalarFieldEnum = {
+  id: 'id',
+  path: 'path',
+  alt_text: 'alt_text',
+  sort_order: 'sort_order',
+  project_id: 'project_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ProjectImageScalarFieldEnum = (typeof ProjectImageScalarFieldEnum)[keyof typeof ProjectImageScalarFieldEnum]
+
+
+export const StackScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  icon_slug: 'icon_slug',
+  color: 'color',
+  website: 'website',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type StackScalarFieldEnum = (typeof StackScalarFieldEnum)[keyof typeof StackScalarFieldEnum]
+
+
+export const ProjectStackScalarFieldEnum = {
+  project_id: 'project_id',
+  stack_id: 'stack_id',
+  created_at: 'created_at'
+} as const
+
+export type ProjectStackScalarFieldEnum = (typeof ProjectStackScalarFieldEnum)[keyof typeof ProjectStackScalarFieldEnum]
+
+
+export const TestimonialScalarFieldEnum = {
+  id: 'id',
+  author_name: 'author_name',
+  author_role: 'author_role',
+  company: 'company',
+  avatar: 'avatar',
+  content: 'content',
+  status: 'status',
+  approved_at: 'approved_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type TestimonialScalarFieldEnum = (typeof TestimonialScalarFieldEnum)[keyof typeof TestimonialScalarFieldEnum]
 
 
 export const SortOrder = {
