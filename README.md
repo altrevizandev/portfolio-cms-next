@@ -70,7 +70,7 @@ executar o segundo comando, disponibilize o arquivo como
 `/opt/portfolio-cms-next/google/recaptcha-auth.json`:
 
 ```bash
-sudo install -d -m 0750 /opt/portfolio/uploads /opt/portfolio/google
+sudo install -d -m 0750 /opt/portfolio-cms-next/uploads /opt/portfolio-cms-next/google
 sudo install -m 0400 /opt/portfolio-cms-next/google/recaptcha-auth.json /opt/portfolio/google/recaptcha-auth.json
 ```
 
