@@ -38,18 +38,20 @@ export function ProjectGallery({
             src={getProjectImageUrl(active.path)!}
             alt={active.alt_text ?? `${projectTitle} — tela ${activeIndex + 1}`}
             fill
+            unoptimized
             sizes="(max-width: 1280px) 100vw, 1200px"
-            className="object-cover"
+            className="pointer-events-none object-contain"
           />
 
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/70 via-black/10 to-transparent p-4 pt-20 sm:p-6">
+          <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between bg-gradient-to-t from-black/70 via-black/10 to-transparent p-4 pt-20 sm:p-6">
             <span className="rounded-full bg-black/35 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
               {activeIndex + 1} / {images.length}
             </span>
             <Button
               variant="secondary"
               size="icon"
-              className="rounded-full"
+              type="button"
+              className="z-20 size-11 rounded-full"
               onClick={() => setExpanded(true)}
             >
               <Expand />
@@ -62,7 +64,8 @@ export function ProjectGallery({
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full opacity-0 shadow-lg transition group-hover:opacity-100 focus:opacity-100"
+                type="button"
+                className="absolute top-1/2 left-4 z-20 size-11 -translate-y-1/2 rounded-full opacity-0 shadow-lg transition group-hover:opacity-100 focus:opacity-100"
                 onClick={previous}
               >
                 <ChevronLeft />
@@ -71,7 +74,8 @@ export function ProjectGallery({
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full opacity-0 shadow-lg transition group-hover:opacity-100 focus:opacity-100"
+                type="button"
+                className="absolute top-1/2 right-4 z-20 size-11 -translate-y-1/2 rounded-full opacity-0 shadow-lg transition group-hover:opacity-100 focus:opacity-100"
                 onClick={next}
               >
                 <ChevronRight />
@@ -119,13 +123,15 @@ export function ProjectGallery({
             src={getProjectImageUrl(active.path)!}
             alt={active.alt_text ?? `${projectTitle} — tela ${activeIndex + 1}`}
             fill
+            unoptimized
             sizes="100vw"
-            className="object-contain"
+            className="pointer-events-none object-contain"
           />
           <Button
             variant="secondary"
             size="icon"
-            className="absolute top-4 right-4 rounded-full"
+            type="button"
+            className="absolute top-4 right-4 z-20 size-11 rounded-full"
             onClick={() => setExpanded(false)}
           >
             <X />
@@ -135,7 +141,8 @@ export function ProjectGallery({
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full"
+                type="button"
+                className="absolute top-1/2 left-4 z-20 size-11 -translate-y-1/2 rounded-full"
                 onClick={previous}
               >
                 <ChevronLeft />
@@ -143,7 +150,8 @@ export function ProjectGallery({
               <Button
                 variant="secondary"
                 size="icon"
-                className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full"
+                type="button"
+                className="absolute top-1/2 right-4 z-20 size-11 -translate-y-1/2 rounded-full"
                 onClick={next}
               >
                 <ChevronRight />
