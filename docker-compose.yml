@@ -1,7 +1,5 @@
-name: portfolio-staging
-
 services:
-  postgres:
+  portfolio-db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -9,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD obrigatorio}
       POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB obrigatorio}
     volumes:
-      - postgres_staging_data:/var/lib/postgresql/data
+      - postgres_prod_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -18,26 +16,26 @@ services:
     networks:
       - internal
 
-  api:
+  portfolio-api:
     build:
       context: ./api
       target: prod
     restart: unless-stopped
     init: true
-    env_file:
-      - .staging.env
     environment:
       NODE_ENV: production
       PORT: 3333
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL obrigatoria}
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/recaptcha-auth.json
+    env_file:
+      - ${APP_ENV_FILE}
     expose:
       - "3333"
     volumes:
-      - ${PORTFOLIO_DATA_DIR:-/opt/portfolio-staging}/uploads:/usr/src/app/uploads
-      - ${RECAPTCHA_CREDENTIALS_FILE:-/opt/portfolio-staging/google/recaptcha-auth.json}:/run/secrets/recaptcha-auth.json:ro
+      - ${PORTFOLIO_DATA_DIR:-/opt/portfolio}/uploads:/usr/src/app/uploads
+      - ${RECAPTCHA_CREDENTIALS_FILE:-/opt/portfolio/google/recaptcha-auth.json}:/run/secrets/recaptcha-auth.json:ro
     depends_on:
-      postgres:
+      portfolio-db:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "node -e \"fetch('http://localhost:3333/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" ]
@@ -45,11 +43,13 @@ services:
       timeout: 5s
       retries: 12
       start_period: 30s
+    security_opt:
+      - no-new-privileges:true
     networks:
       - internal
       - reverse-proxy
 
-  web:
+  portfolio-web:
     build:
       context: ./web
       target: prod
@@ -59,15 +59,17 @@ services:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL obrigatoria}
     restart: unless-stopped
     init: true
+    env_file:
+      - ${APP_ENV_FILE}
     environment:
-      API_INTERNAL_URL: http://api:3333
+      API_INTERNAL_URL: http://portfolio-api:3333
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL obrigatoria}
       NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:?NEXT_PUBLIC_RECAPTCHA_SITE_KEY obrigatoria}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL obrigatoria}
     expose:
       - "3000"
     depends_on:
-      api:
+      portfolio-api:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "node -e \"fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" ]
@@ -75,12 +77,14 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
+    security_opt:
+      - no-new-privileges:true
     networks:
       - internal
       - reverse-proxy
 
 volumes:
-  postgres_staging_data:
+  postgres_prod_data:
 
 networks:
   internal:

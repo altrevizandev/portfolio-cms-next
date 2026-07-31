@@ -1,7 +1,5 @@
-name: portfolio-dev
-
 services:
-  postgres:
+  portfolio-db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -20,7 +18,7 @@ services:
     networks:
       - internal
 
-  api:
+  portfolio-api:
     build:
       context: ./api
       target: dev
@@ -33,7 +31,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/recaptcha-auth.json
       CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-true}
     env_file:
-      - ./api/.env
+      - ${APP_ENV_FILE}
     ports:
       - "${API_PORT:-3333}:3333"
     volumes:
@@ -42,7 +40,7 @@ services:
       - ./uploads:/usr/src/app/uploads
       - ${RECAPTCHA_CREDENTIALS_FILE:-./google/portfolio-504013-5d6347d410cb.json}:/run/secrets/recaptcha-auth.json:ro
     depends_on:
-      postgres:
+      portfolio-db:
         condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "node -e \"fetch('http://localhost:3333/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" ]
@@ -53,7 +51,7 @@ services:
     networks:
       - internal
 
-  web:
+  portfolio-web:
     build:
       context: ./web
       target: dev
@@ -61,7 +59,7 @@ services:
     init: true
     environment:
       NODE_ENV: development
-      API_INTERNAL_URL: http://api:3333
+      API_INTERNAL_URL: http://portfolio-api:3333
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3333}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
       WATCHPACK_POLLING: ${CHOKIDAR_USEPOLLING:-true}
@@ -72,7 +70,7 @@ services:
       - web_node_modules:/usr/src/app/node_modules
       - web_next_cache:/usr/src/app/.next
     depends_on:
-      api:
+      portfolio-api:
         condition: service_healthy
     networks:
       - internal

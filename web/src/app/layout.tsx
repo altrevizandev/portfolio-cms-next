@@ -27,10 +27,7 @@ export const metadata: Metadata = {
     description: "Produtos digitais construídos com propósito, do backend à experiência final.",
   },
   icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
+    icon: { url: "/icon.svg", type: "image/svg+xml" },
   },
 }
 

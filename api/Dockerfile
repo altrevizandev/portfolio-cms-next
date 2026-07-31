@@ -16,7 +16,7 @@ COPY . .
 
 EXPOSE 3333
 
-CMD ["sh", "-c", "pnpm dlx prisma migrate deploy && pnpm dlx prisma db seed && pnpm dlx prisma generate && tsx watch src/server.ts"]
+CMD ["tsx", "watch", "src/server.ts"]
 
 # BUILD
 
@@ -25,7 +25,7 @@ FROM base AS build
 COPY . .
 
 RUN pnpm run build
-RUN pnpm dlx prisma generate
+RUN pnpm exec prisma generate
 
 # PROD
 
@@ -44,4 +44,4 @@ RUN pnpm install
 
 EXPOSE 3333
 
-CMD ["sh", "-c", "pnpm dlx prisma migrate deploy && pnpm dlx prisma generate && pnpm dlx prisma db seed && node dist/src/server.js"]
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm exec prisma generate && pnpm exec prisma db seed && node dist/src/server.js"]

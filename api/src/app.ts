@@ -16,6 +16,7 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifyCookie from '@fastify/cookie';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
+import { mkdir } from 'node:fs/promises';
 import * as dotenv from "dotenv";
 import { ApiError } from './utils/ApiError.js';
 import { uploadsDirectory } from './utils/uploads.js';
@@ -49,6 +50,8 @@ export class App {
         fileSize: 5 * 1024 * 1024,
       },
     });
+
+    await mkdir(uploadsDirectory, { recursive: true });
 
     await this.app.register(fastifyStatic, {
       root: uploadsDirectory,
@@ -123,8 +126,8 @@ export class App {
     await this.app.register(fastifySwagger, {
       openapi: {
         info: {
-          title: 'Portfolio API',
-          description: `API para gerenciamento do app portfolio`,
+          title: 'Documentação API Portfolio Andre Lucas Trevizan',
+          description: `API responsável pelo portfólio profissional de Andre Lucas Trevizan. Centraliza o gerenciamento dos conteúdos públicos e do CMS, incluindo homepage, projetos, tecnologias, trajetória profissional, formações, depoimentos, uploads de arquivos, autenticação e contato.`,
           version: '1.0.0',
         },
         components: {
@@ -142,7 +145,10 @@ export class App {
 
     await this.app.register(fastifySwaggerUi, {
       routePrefix: "/docs",
-      indexPrefix: process.env.NODE_ENV == "production" ? "/api" : ""
+      indexPrefix: process.env.NODE_ENV == "production" ? "/api" : "",
+      theme: {
+        title: "Documentação API Portfolio Andre Lucas Trevizan"
+      }
     });
   }
 
