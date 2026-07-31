@@ -65,11 +65,13 @@ Use banco, domínio, credencial do reCAPTCHA e diretório de uploads separados d
 
 ## Produção
 
-Crie os diretórios persistentes e instale a credencial do reCAPTCHA:
+Crie os diretórios persistentes e instale a credencial do reCAPTCHA. Antes de
+executar o segundo comando, disponibilize o arquivo como
+`/opt/portfolio-cms-next/google/recaptcha-auth.json`:
 
 ```bash
 sudo install -d -m 0750 /opt/portfolio/uploads /opt/portfolio/google
-sudo install -m 0400 recaptcha-auth.json /opt/portfolio/google/recaptcha-auth.json
+sudo install -m 0400 /opt/portfolio-cms-next/google/recaptcha-auth.json /opt/portfolio/google/recaptcha-auth.json
 ```
 
 Crie a rede compartilhada com o Nginx, caso ainda não exista:
