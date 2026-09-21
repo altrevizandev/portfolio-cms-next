@@ -4,8 +4,7 @@ WORKDIR /usr/src/app
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN corepack enable \
- && corepack prepare pnpm@10.33.0 --activate
+RUN npm install --global pnpm@10.33.0 --fetch-retries=5 --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=60000
 
 RUN pnpm install --frozen-lockfile --config.minimum-release-age=0
 
