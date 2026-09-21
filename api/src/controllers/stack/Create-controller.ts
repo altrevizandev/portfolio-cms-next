@@ -1,22 +1,16 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import {
-  StackCreateService,
-  type StackInput,
-} from "../../services/stack/Create-service.js";
+import { makeStackCreateService } from "../../factories/stack/make-services.js";
+import { type StackInput } from "../../services/stack/Create-service.js";
 
 export type StackCreateRequest = {
   Body: StackInput;
 };
 
 export class StackCreateController {
-  private readonly stackCreateService = new StackCreateService();
+  private readonly stackCreateService = makeStackCreateService();
 
-  public async handle(
-    request: FastifyRequest<StackCreateRequest>,
-    reply: FastifyReply,
-  ) {
-    this.stackCreateService.data = request.body;
-    const stack = await this.stackCreateService.execute();
+  public async handle(request: FastifyRequest<StackCreateRequest>, reply: FastifyReply) {
+    const stack = await this.stackCreateService.execute({ data: request.body });
     return reply.code(201).send({ stack });
   }
 }

@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ProjectPublicListService } from "../../services/project/List-public-service.js";
+import { makeProjectPublicListService } from "../../factories/project/make-services.js";
 
 export class ProjectPublicListController {
-  private readonly service = new ProjectPublicListService();
+  private readonly service = makeProjectPublicListService();
 
   public async handle(_request: FastifyRequest, reply: FastifyReply) {
     return reply.code(200).send({ projects: await this.service.execute() });

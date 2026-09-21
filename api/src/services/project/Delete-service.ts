@@ -1,23 +1,20 @@
-import { ProjectRepository } from "../../repositories/Project-repository.js";
+import type { ProjectContract } from "../../contracts/ProjectContract.js";
+import type { ProjectDeleteDTO } from "../../dtos/project/ProjectDeleteDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class ProjectDeleteService {
-  public project_id = "";
-  private readonly projectRepository = new ProjectRepository();
+  constructor(private readonly projectRepository: ProjectContract) {}
 
-  public async execute() {
-    this.projectRepository.project_id = this.project_id;
-    const project = await this.projectRepository.findById();
+  public async execute(input: ProjectDeleteDTO) {
+    const project = await this.projectRepository.findById({ project_id: input.project_id });
 
     if (!project) {
       throw new ApiError("Projeto nao encontrado", 404);
     }
 
-    await this.projectRepository.delete();
+    await this.projectRepository.delete({ project_id: input.project_id });
 
-    return [
-      project.thumbnail,
-      ...project.images.map((image) => image.path),
-    ];
+    return [project.thumbnail, ...project.images.map((image) => image.path)];
   }
 }

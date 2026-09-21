@@ -1,33 +1,11 @@
+import type { HomepageContract } from "../contracts/HomepageContract.js";
+import type { HomepageData } from "../dtos/homepage/HomepageData.js";
 import { prisma } from "../infra/prisma/index.js";
 import type { PrismaTransactionClient } from "./index.js";
+export type { HomepageData } from "../dtos/homepage/HomepageData.js";
 
-export type HomepageData = {
-  headline: string;
-  subheadline: string | null;
-  biography: string;
-  primary_photo: string | null;
-  secondary_photo: string | null;
-  email: string | null;
-  github_url: string | null;
-  linkedin_url: string | null;
-};
-
-export class HomepageRepository {
-  public homepage_id = 1;
-  public data: HomepageData = {
-    headline: "",
-    subheadline: null,
-    biography: "",
-    primary_photo: null,
-    secondary_photo: null,
-    email: null,
-    github_url: null,
-    linkedin_url: null,
-  };
-
-  constructor(
-    private readonly prismaClient: PrismaTransactionClient = prisma,
-  ) {}
+export class HomepageRepository implements HomepageContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
   public async findSingletonCandidates() {
     return this.prismaClient.homepage.findMany({
@@ -36,14 +14,14 @@ export class HomepageRepository {
     });
   }
 
-  public async upsert() {
+  public async upsert(input: { data: HomepageData }) {
     return this.prismaClient.homepage.upsert({
-      where: { id: this.homepage_id },
+      where: { id: 1 },
       create: {
-        id: this.homepage_id,
-        ...this.data,
+        id: 1,
+        ...input.data,
       },
-      update: this.data,
+      update: input.data,
     });
   }
 }

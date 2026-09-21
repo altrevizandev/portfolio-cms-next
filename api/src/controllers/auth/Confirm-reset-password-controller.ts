@@ -1,33 +1,28 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { makeConfirmResetPasswordService } from "../../factories/auth/make-services.js";
 import { ConfirmResetPasswordService } from "../../services/auth/Confirm-reset-password-service.js";
 
 type ConfirmResetPasswordProps = {
-  token: string
-  password: string
-  confirmPassword: string
-}
+  token: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export type ConfirmResetPasswordRequest = {
-  Body: ConfirmResetPasswordProps
-}
+  Body: ConfirmResetPasswordProps;
+};
 
 export class ConfirmResetPasswordController {
   private readonly confirmResetPasswordService: ConfirmResetPasswordService;
-  
+
   constructor() {
-    this.confirmResetPasswordService = new ConfirmResetPasswordService();
+    this.confirmResetPasswordService = makeConfirmResetPasswordService();
   }
 
   public async handle(request: FastifyRequest<ConfirmResetPasswordRequest>, reply: FastifyReply) {
-    const {
-      token,
-      password
-    } = request.body;
+    const { token, password } = request.body;
 
-    this.confirmResetPasswordService.token = token;
-    this.confirmResetPasswordService.password = password;
-
-    await this.confirmResetPasswordService.execute();
+    await this.confirmResetPasswordService.execute({ token: token, password: password });
 
     return reply.code(204).send();
   }

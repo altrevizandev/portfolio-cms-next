@@ -1,11 +1,7 @@
-import { StackRepository } from "../../repositories/Stack-repository.js";
+import type { StackContract } from "../../contracts/StackContract.js";
 
 export class StackListService {
-  private readonly stackRepository: StackRepository;
-
-  constructor() {
-    this.stackRepository = new StackRepository();
-  }
+  constructor(private readonly stackRepository: StackContract) {}
 
   public async execute() {
     return this.stackRepository.list();

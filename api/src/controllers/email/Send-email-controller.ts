@@ -2,15 +2,15 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { SendEmailService } from "../../services/email/send-email-service.js";
 
 type SendEmailProps = {
-  from: string
-  to: string
-  subject: string
-  html: string
-}
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+};
 
 export type SendEmailRequest = {
-  Body: SendEmailProps
-}
+  Body: SendEmailProps;
+};
 
 export class SendEmailController {
   private readonly sendEmailService: SendEmailService;
@@ -20,18 +20,18 @@ export class SendEmailController {
   }
 
   public async handle(request: FastifyRequest<SendEmailRequest>, reply: FastifyReply) {
-    const {
-      from,
-      to,
-      subject,
-      html
-    } = request.body;
+    const { from, to, subject, html } = request.body;
 
-    this.sendEmailService.from = from;
-    this.sendEmailService.to = to;
-    this.sendEmailService.subject = subject;
-    this.sendEmailService.html = html;
-
-    this.sendEmailService.execute();
+    await this.sendEmailService.execute({
+      template: "",
+      html: html,
+      templateData: {},
+      from: from,
+      to: to,
+      replyTo: "",
+      subject: subject,
+      attachments: [],
+    });
+    return reply.code(204).send();
   }
 }

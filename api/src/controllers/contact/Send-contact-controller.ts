@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { SendEmailService } from "../../services/email/send-email-service.js";
-import { VerifyRecaptchaService } from "../../services/security/Verify-recaptcha-service.js";
+import { makeSendContactService } from "../../factories/contact/make-services.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 const allowedAttachments = new Set([
@@ -47,32 +47,22 @@ export class SendContactController {
       };
     }
 
-    const parsed = z.strictObject({
-      name: z.string().trim().min(2).max(100),
-      email: z.email().max(160),
-      phone: z.string().trim().max(30).optional(),
-      subject: z.string().trim().min(3).max(140),
-      message: z.string().trim().min(20).max(5000),
-      recaptcha_token: z.string().min(1),
-    }).safeParse(fields);
+    const parsed = z
+      .strictObject({
+        name: z.string().trim().min(2).max(100),
+        email: z.email().max(160),
+        phone: z.string().trim().max(30).optional(),
+        subject: z.string().trim().min(3).max(140),
+        message: z.string().trim().min(20).max(5000),
+        recaptcha_token: z.string().min(1),
+      })
+      .safeParse(fields);
 
     if (!parsed.success) {
       throw new ApiError(`Dados de contato invalidos: ${z.prettifyError(parsed.error)}`, 400);
     }
 
-    const recaptcha = new VerifyRecaptchaService();
-    recaptcha.token = parsed.data.recaptcha_token;
-    recaptcha.expected_action = "send_contact";
-    await recaptcha.execute();
-
-    const mail = new SendEmailService();
-    mail.to = process.env.MAIL_CONTACT_TO || process.env.MAIL_AUTH!;
-    mail.replyTo = parsed.data.email;
-    mail.subject = `[Portfólio] ${parsed.data.subject}`;
-    mail.template = "contact-message";
-    mail.templateData = parsed.data;
-    if (attachment) mail.attachments = [ attachment ];
-    await mail.execute();
+    await makeSendContactService().execute({ data: parsed.data, attachment });
 
     return reply.code(202).send({ message: "Mensagem enviada. Responderei em breve!" });
   }

@@ -48,110 +48,123 @@
 }
 
 :root {
-  --background: #f7f8fc;
-  --foreground: #171927;
+  --background: #f5f8fb;
+  --foreground: #17212b;
   --card: #ffffff;
-  --card-foreground: #171927;
+  --card-foreground: #17212b;
   --popover: #ffffff;
-  --popover-foreground: #171927;
-  --primary: #6842e8;
+  --popover-foreground: #17212b;
+  --primary: #176391;
   --primary-foreground: #ffffff;
-  --secondary: #087f78;
+  --secondary: #176391;
   --secondary-foreground: #ffffff;
-  --muted: #eef0f7;
-  --muted-foreground: #62677b;
-  --accent: #ebe7ff;
-  --accent-foreground: #4d2db7;
+  --muted: #eaf0f5;
+  --muted-foreground: #5e6d7b;
+  --accent: #e0f0fb;
+  --accent-foreground: #14557f;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
-  --border: #dfe2ec;
-  --input: #d5d9e7;
-  --ring: #6842e8;
+  --border: #d8e2eb;
+  --input: #c8d6e2;
+  --ring: #176391;
   --radius: 0.85rem;
-  --sidebar: #f4f5fa;
-  --sidebar-foreground: #171927;
-  --sidebar-primary: #6842e8;
+  --sidebar: #edf3f8;
+  --sidebar-foreground: #17212b;
+  --sidebar-primary: #176391;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ebe7ff;
-  --sidebar-accent-foreground: #4d2db7;
-  --sidebar-border: #dfe2ec;
-  --sidebar-ring: #6842e8;
-  --chart-1: #6842e8;
-  --chart-2: #087f78;
-  --chart-3: #db2777;
-  --chart-4: #d97706;
+  --sidebar-accent: #e0f0fb;
+  --sidebar-accent-foreground: #14557f;
+  --sidebar-border: #d8e2eb;
+  --sidebar-ring: #176391;
+  --chart-1: #176391;
+  --chart-2: #378abd;
+  --chart-3: #67b4e3;
+  --chart-4: #677f93;
   --chart-5: #334155;
-  --success: #087f78;
+  --success: #287552;
   --warning: #d97706;
   --info: #2563eb;
   --danger: #b91c1c;
   --surface: #ffffff;
-  --surface-muted: #f4f5fa;
+  --surface-muted: #edf3f8;
 }
 
 .dark {
-  --background: #0b0d16;
-  --foreground: #f5f6fc;
-  --card: #131621;
-  --card-foreground: #f5f6fc;
-  --popover: #191c29;
-  --popover-foreground: #f5f6fc;
-  --primary: #a78bfa;
-  --primary-foreground: #17102f;
-  --secondary: #2dd4bf;
-  --secondary-foreground: #05201d;
-  --muted: #202432;
-  --muted-foreground: #aeb4c8;
-  --accent: #292342;
-  --accent-foreground: #d8ccff;
+  --background: #101214;
+  --foreground: #edf2f6;
+  --card: #161a1e;
+  --card-foreground: #edf2f6;
+  --popover: #1c2228;
+  --popover-foreground: #edf2f6;
+  --primary: #9ed4f5;
+  --primary-foreground: #102331;
+  --secondary: #9ed4f5;
+  --secondary-foreground: #102331;
+  --muted: #202830;
+  --muted-foreground: #a2afbc;
+  --accent: #1d3344;
+  --accent-foreground: #d5edfc;
   --destructive: #f05252;
   --destructive-foreground: #210707;
-  --border: #2b3040;
-  --input: #363c50;
-  --ring: #a78bfa;
-  --sidebar: #10131d;
-  --sidebar-foreground: #f5f6fc;
-  --sidebar-primary: #a78bfa;
-  --sidebar-primary-foreground: #17102f;
-  --sidebar-accent: #292342;
-  --sidebar-accent-foreground: #d8ccff;
-  --sidebar-border: #2b3040;
-  --sidebar-ring: #a78bfa;
-  --chart-1: #a78bfa;
-  --chart-2: #2dd4bf;
-  --chart-3: #f472b6;
-  --chart-4: #fbbf24;
+  --border: #2b353f;
+  --input: #3b4b5a;
+  --ring: #9ed4f5;
+  --sidebar: #14191e;
+  --sidebar-foreground: #edf2f6;
+  --sidebar-primary: #9ed4f5;
+  --sidebar-primary-foreground: #102331;
+  --sidebar-accent: #1d3344;
+  --sidebar-accent-foreground: #d5edfc;
+  --sidebar-border: #2b353f;
+  --sidebar-ring: #9ed4f5;
+  --chart-1: #9ed4f5;
+  --chart-2: #65b4e5;
+  --chart-3: #378abd;
+  --chart-4: #8298aa;
   --chart-5: #cbd5e1;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     min-height: 100svh;
-    }
+  }
   html {
     @apply font-sans;
     scroll-padding-top: 6rem;
-    }
+  }
   [id] {
     scroll-margin-top: 6rem;
-    }
-  h1, h2, h3, h4, h5, h6 {
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading;
     letter-spacing: -0.025em;
     text-wrap: balance;
-    }
+  }
 }
 
 @layer utilities {
   .portfolio-grid {
     background-image:
-      linear-gradient(to right, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px);
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--border) 55%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--border) 55%, transparent) 1px,
+        transparent 1px
+      );
     background-size: 4rem 4rem;
     mask-image: linear-gradient(to bottom, black, transparent 88%);
   }

@@ -1,60 +1,33 @@
-import {
-  HomepageRepository,
-  type HomepageData,
-} from "../../repositories/Homepage-repository.js";
+import type { HomepageContract } from "../../contracts/HomepageContract.js";
+import type { HomepageUpsertDTO } from "../../dtos/homepage/HomepageDTO.js";
 import { ApiError } from "../../utils/ApiError.js";
-
-export type HomepageUpsertData = Omit<
-  HomepageData,
-  "primary_photo" | "secondary_photo"
-> & {
-  primary_photo?: string;
-  secondary_photo?: string;
-};
+export type { HomepageUpsertData } from "../../dtos/homepage/HomepageDTO.js";
 
 export class HomepageUpsertService {
-  public data: HomepageUpsertData = {
-    headline: "",
-    subheadline: null,
-    biography: "",
-    email: null,
-    github_url: null,
-    linkedin_url: null,
-  };
+  constructor(private readonly homepageRepository: HomepageContract) {}
 
-  private readonly homepageRepository: HomepageRepository;
-
-  constructor() {
-    this.homepageRepository = new HomepageRepository();
-  }
-
-  public async execute() {
+  public async execute(input: HomepageUpsertDTO) {
     const homepages = await this.homepageRepository.findSingletonCandidates();
 
     if (homepages.length > 1 || (homepages[0] && homepages[0].id !== 1)) {
-      throw new ApiError(
-        "A configuracao da homepage viola a regra de singleton",
-        409,
-      );
+      throw new ApiError("A configuracao da homepage viola a regra de singleton", 409);
     }
 
     const currentHomepage = homepages[0];
 
-    this.homepageRepository.data = {
-      ...this.data,
-      primary_photo:
-        this.data.primary_photo ?? currentHomepage?.primary_photo ?? null,
-      secondary_photo:
-        this.data.secondary_photo ?? currentHomepage?.secondary_photo ?? null,
-    };
-
-    const homepage = await this.homepageRepository.upsert();
+    const homepage = await this.homepageRepository.upsert({
+      data: {
+        ...input.data,
+        primary_photo: input.data.primary_photo ?? currentHomepage?.primary_photo ?? null,
+        secondary_photo: input.data.secondary_photo ?? currentHomepage?.secondary_photo ?? null,
+      },
+    });
 
     return {
       homepage,
       replaced_photos: [
-        this.data.primary_photo ? currentHomepage?.primary_photo : null,
-        this.data.secondary_photo ? currentHomepage?.secondary_photo : null,
+        input.data.primary_photo ? currentHomepage?.primary_photo : null,
+        input.data.secondary_photo ? currentHomepage?.secondary_photo : null,
       ].filter((path): path is string => Boolean(path)),
     };
   }

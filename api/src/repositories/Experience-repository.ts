@@ -1,58 +1,41 @@
+import type { ExperienceContract } from "../contracts/ExperienceContract.js";
+import type { ExperienceData } from "../dtos/experience/ExperienceData.js";
 import { prisma } from "../infra/prisma/index.js";
+import type { PrismaTransactionClient } from "./index.js";
+export type { ExperienceData } from "../dtos/experience/ExperienceData.js";
 
-export type ExperienceData = {
-  company: string;
-  role: string;
-  description: string;
-  start_date: Date;
-  end_date: Date | null;
-  current: boolean;
-  sort_order: number;
-  published: boolean;
-};
-
-export class ExperienceRepository {
-  public experience_id = "";
-  public data: ExperienceData = {
-    company: "",
-    role: "",
-    description: "",
-    start_date: new Date(),
-    end_date: null,
-    current: false,
-    sort_order: 0,
-    published: true,
-  };
+export class ExperienceRepository implements ExperienceContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
   public listPublic() {
-    return prisma.experience.findMany({
+    return this.prismaClient.experience.findMany({
       where: { published: true },
-      orderBy: [ { sort_order: "asc" }, { start_date: "desc" } ],
+      orderBy: [{ sort_order: "asc" }, { start_date: "desc" }],
     });
   }
 
   public listAdmin() {
-    return prisma.experience.findMany({
-      orderBy: [ { sort_order: "asc" }, { start_date: "desc" } ],
+    return this.prismaClient.experience.findMany({
+      orderBy: [{ sort_order: "asc" }, { start_date: "desc" }],
     });
   }
 
-  public findById() {
-    return prisma.experience.findUnique({ where: { id: this.experience_id } });
+  public findById(input: { experience_id: string }) {
+    return this.prismaClient.experience.findUnique({ where: { id: input.experience_id } });
   }
 
-  public create() {
-    return prisma.experience.create({ data: this.data });
+  public create(input: { data: ExperienceData }) {
+    return this.prismaClient.experience.create({ data: input.data });
   }
 
-  public update() {
-    return prisma.experience.update({
-      where: { id: this.experience_id },
-      data: this.data,
+  public update(input: { experience_id: string; data: ExperienceData }) {
+    return this.prismaClient.experience.update({
+      where: { id: input.experience_id },
+      data: input.data,
     });
   }
 
-  public delete() {
-    return prisma.experience.delete({ where: { id: this.experience_id } });
+  public delete(input: { experience_id: string }) {
+    return this.prismaClient.experience.delete({ where: { id: input.experience_id } });
   }
 }

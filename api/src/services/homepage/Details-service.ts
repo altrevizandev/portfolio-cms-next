@@ -1,21 +1,15 @@
-import { HomepageRepository } from "../../repositories/Homepage-repository.js";
+import type { HomepageContract } from "../../contracts/HomepageContract.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class HomepageDetailsService {
-  private readonly homepageRepository: HomepageRepository;
-
-  constructor() {
-    this.homepageRepository = new HomepageRepository();
-  }
+  constructor(private readonly homepageRepository: HomepageContract) {}
 
   public async execute() {
     const homepages = await this.homepageRepository.findSingletonCandidates();
 
     if (homepages.length > 1 || (homepages[0] && homepages[0].id !== 1)) {
-      throw new ApiError(
-        "A configuracao da homepage viola a regra de singleton",
-        409,
-      );
+      throw new ApiError("A configuracao da homepage viola a regra de singleton", 409);
     }
 
     const homepage = homepages[0];

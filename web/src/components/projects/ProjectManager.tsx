@@ -52,7 +52,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 
-const IMAGE_TYPES = [ "image/jpeg", "image/png", "image/webp" ]
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
 type ProjectFormData = {
@@ -60,6 +60,8 @@ type ProjectFormData = {
   slug: string
   description: string
   objective: string
+  is_public: boolean
+  application_url: string
   challenge: string
   status: PublicationStatus
   featured: boolean
@@ -78,6 +80,8 @@ const EMPTY_FORM: ProjectFormData = {
   slug: "",
   description: "",
   objective: "",
+  is_public: false,
+  application_url: "",
   challenge: "",
   status: "DRAFT",
   featured: false,
@@ -112,14 +116,14 @@ export function ProjectManager({
         )
       return matchesStatus && matchesSearch
     })
-  }, [ projects, search, status ])
+  }, [projects, search, status])
 
   const saved = (project: Project) => {
     setProjects((current) => {
       const exists = current.some((item) => item.id === project.id)
       const next = exists
-        ? current.map((item) => item.id === project.id ? project : item)
-        : [ ...current, project ]
+        ? current.map((item) => (item.id === project.id ? project : item))
+        : [...current, project]
       return next.sort((a, b) => a.sort_order - b.sort_order)
     })
     setFormOpen(false)
@@ -167,9 +171,13 @@ export function ProjectManager({
       {filtered.length === 0 ? (
         <Empty className="min-h-80 border">
           <EmptyHeader>
-            <EmptyMedia variant="icon"><FileImage /></EmptyMedia>
+            <EmptyMedia variant="icon">
+              <FileImage />
+            </EmptyMedia>
             <EmptyTitle>
-              {projects.length === 0 ? "Nenhum projeto cadastrado" : "Nenhum resultado"}
+              {projects.length === 0
+                ? "Nenhum projeto cadastrado"
+                : "Nenhum resultado"}
             </EmptyTitle>
             <EmptyDescription>
               {projects.length === 0
@@ -245,7 +253,8 @@ function ProjectCard({
           <StatusBadge status={project.status} />
           {project.featured && (
             <Badge className="bg-amber-400 text-amber-950">
-              <Star className="fill-current" />Destaque
+              <Star className="fill-current" />
+              Destaque
             </Badge>
           )}
         </div>
@@ -253,7 +262,9 @@ function ProjectCard({
 
       <CardContent className="space-y-4 p-5">
         <div>
-          <h2 className="font-heading text-xl font-semibold">{project.title}</h2>
+          <h2 className="font-heading text-xl font-semibold">
+            {project.title}
+          </h2>
           <p className="mt-1 text-xs text-muted-foreground">/{project.slug}</p>
         </div>
         <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -261,7 +272,9 @@ function ProjectCard({
         </p>
         <div className="flex flex-wrap gap-1.5">
           {project.stacks.slice(0, 5).map(({ stack }) => (
-            <Badge key={stack.id} variant="outline">{stack.name}</Badge>
+            <Badge key={stack.id} variant="outline">
+              {stack.name}
+            </Badge>
           ))}
           {project.stacks.length > 5 && (
             <Badge variant="outline">+{project.stacks.length - 5}</Badge>
@@ -269,7 +282,8 @@ function ProjectCard({
         </div>
         <div className="flex items-center justify-between border-t pt-4">
           <span className="text-xs text-muted-foreground">
-            {project.images.length} {project.images.length === 1 ? "imagem" : "imagens"}
+            {project.images.length}{" "}
+            {project.images.length === 1 ? "imagem" : "imagens"}
           </span>
           <div className="flex gap-1">
             <Button variant="ghost" size="icon-sm" onClick={onEdit}>
@@ -335,13 +349,15 @@ function ProjectForm({
           slug: project.slug,
           description: project.description,
           objective: project.objective,
+          is_public: project.is_public ?? false,
+          application_url: project.application_url ?? "",
           challenge: project.challenge ?? "",
           status: project.status,
           featured: project.featured,
           sort_order: project.sort_order,
           stack_ids: project.stacks.map(({ stack_id }) => stack_id),
         }
-      : EMPTY_FORM,
+      : EMPTY_FORM
   )
   const [slugWasEdited, setSlugWasEdited] = useState(Boolean(project))
   const [thumbnail, setThumbnail] = useState<File | null>(null)
@@ -354,7 +370,7 @@ function ProjectForm({
 
   const setField = <K extends keyof ProjectFormData>(
     field: K,
-    value: ProjectFormData[K],
+    value: ProjectFormData[K]
   ) => setForm((current) => ({ ...current, [field]: value }))
 
   const changeTitle = (title: string) => {
@@ -403,8 +419,8 @@ function ProjectForm({
     setField(
       "stack_ids",
       checked
-        ? [ ...new Set([ ...form.stack_ids, stackId ]) ]
-        : form.stack_ids.filter((id) => id !== stackId),
+        ? [...new Set([...form.stack_ids, stackId])]
+        : form.stack_ids.filter((id) => id !== stackId)
     )
   }
 
@@ -425,12 +441,17 @@ function ProjectForm({
       if (form.slug) payload.set("slug", form.slug)
       payload.set("description", form.description)
       payload.set("objective", form.objective)
+      payload.set("is_public", String(form.is_public))
+      payload.set("application_url", form.is_public ? form.application_url : "")
       payload.set("challenge", form.challenge)
       payload.set("status", form.status)
       payload.set("featured", String(form.featured))
       payload.set("sort_order", String(form.sort_order))
       payload.set("stack_ids", JSON.stringify(form.stack_ids))
-      payload.set("image_alt_texts", JSON.stringify(newImages.map((image) => image.alt)))
+      payload.set(
+        "image_alt_texts",
+        JSON.stringify(newImages.map((image) => image.alt))
+      )
       if (thumbnail) payload.set("thumbnail", thumbnail)
       newImages.forEach(({ file }) => payload.append("images", file))
 
@@ -440,9 +461,9 @@ function ProjectForm({
           method: project ? "PUT" : "POST",
           credentials: "include",
           body: payload,
-        },
+        }
       )
-      const result = await response.json() as {
+      const result = (await response.json()) as {
         project?: Project
         message?: string
       }
@@ -471,10 +492,10 @@ function ProjectForm({
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/projects/${project.id}/images/${image.id}`,
-        { method: "DELETE", credentials: "include" },
+        { method: "DELETE", credentials: "include" }
       )
       if (!response.ok) {
-        const result = await response.json() as { message?: string }
+        const result = (await response.json()) as { message?: string }
         setError(result.message ?? "Não foi possível remover a imagem")
         return
       }
@@ -491,8 +512,8 @@ function ProjectForm({
     if (!project) return
     const target = index + direction
     if (target < 0 || target >= existingImages.length) return
-    const next = [ ...existingImages ]
-    ;[ next[index], next[target] ] = [ next[target], next[index] ]
+    const next = [...existingImages]
+    ;[next[index], next[target]] = [next[target], next[index]]
     setGalleryBusy(true)
 
     try {
@@ -503,9 +524,9 @@ function ProjectForm({
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image_ids: next.map((image) => image.id) }),
-        },
+        }
       )
-      const result = await response.json() as {
+      const result = (await response.json()) as {
         images?: ProjectImage[]
         message?: string
       }
@@ -520,14 +541,16 @@ function ProjectForm({
     }
   }
 
-  const currentThumbnail = thumbnailPreview ?? getProjectImageUrl(project?.thumbnail)
+  const currentThumbnail =
+    thumbnailPreview ?? getProjectImageUrl(project?.thumbnail)
 
   return (
     <DialogContent className="max-h-[92svh] overflow-y-auto sm:max-w-4xl">
       <DialogHeader>
         <DialogTitle>{project ? "Editar projeto" : "Novo projeto"}</DialogTitle>
         <DialogDescription>
-          Conte a história do projeto e selecione as imagens que formarão o carrossel.
+          Conte a história do projeto e selecione as imagens que formarão o
+          carrossel.
         </DialogDescription>
       </DialogHeader>
 
@@ -598,14 +621,69 @@ function ProjectForm({
           </Field>
         </div>
 
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="project-access">Acesso à aplicação</FieldLabel>
+            <Select
+              value={form.is_public ? "public" : "private"}
+              onValueChange={(value) =>
+                setField("is_public", value === "public")
+              }
+            >
+              <SelectTrigger id="project-access" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="private">Privado — rede interna</SelectItem>
+                <SelectItem value="public">
+                  Público — acessar pelo link
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              Independente da publicação do case no portfólio.
+            </FieldDescription>
+          </Field>
+          <Field>
+            {form.is_public ? (
+              <>
+                <FieldLabel htmlFor="project-url">Link da aplicação</FieldLabel>
+                <Input
+                  id="project-url"
+                  type="url"
+                  required
+                  pattern="https?://.*"
+                  placeholder="https://app.exemplo.com"
+                  value={form.application_url}
+                  onChange={(event) =>
+                    setField("application_url", event.target.value)
+                  }
+                />
+                <FieldDescription>
+                  O botão Acessar abrirá este endereço em uma nova aba.
+                </FieldDescription>
+              </>
+            ) : (
+              <FieldDescription>
+                A aplicação só é acessível na rede interna do cliente. O botão
+                Acessar ficará desabilitado com essa explicação.
+              </FieldDescription>
+            )}
+          </Field>
+        </div>
+
         <div className="grid gap-5 sm:grid-cols-3">
           <Field>
             <FieldLabel>Status</FieldLabel>
             <Select
               value={form.status}
-              onValueChange={(value) => setField("status", value as PublicationStatus)}
+              onValueChange={(value) =>
+                setField("status", value as PublicationStatus)
+              }
             >
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="DRAFT">Rascunho</SelectItem>
                 <SelectItem value="PUBLISHED">Publicado</SelectItem>
@@ -620,14 +698,18 @@ function ProjectForm({
               type="number"
               min={0}
               value={form.sort_order}
-              onChange={(event) => setField("sort_order", Number(event.target.value))}
+              onChange={(event) =>
+                setField("sort_order", Number(event.target.value))
+              }
             />
           </Field>
           <Field className="justify-end">
             <label className="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg border px-3">
               <Checkbox
                 checked={form.featured}
-                onCheckedChange={(checked) => setField("featured", checked === true)}
+                onCheckedChange={(checked) =>
+                  setField("featured", checked === true)
+                }
               />
               <span className="text-sm font-medium">Projeto em destaque</span>
             </label>
@@ -652,7 +734,9 @@ function ProjectForm({
                 >
                   <Checkbox
                     checked={form.stack_ids.includes(stack.id)}
-                    onCheckedChange={(checked) => toggleStack(stack.id, checked === true)}
+                    onCheckedChange={(checked) =>
+                      toggleStack(stack.id, checked === true)
+                    }
                   />
                   <span
                     className="size-2.5 rounded-full"
@@ -728,7 +812,9 @@ function ProjectForm({
                   alt={image.alt_text ?? ""}
                   label={`Imagem ${index + 1}`}
                   disabled={galleryBusy}
-                  onUp={index > 0 ? () => moveExistingImage(index, -1) : undefined}
+                  onUp={
+                    index > 0 ? () => moveExistingImage(index, -1) : undefined
+                  }
                   onDown={
                     index < existingImages.length - 1
                       ? () => moveExistingImage(index, 1)
@@ -769,9 +855,15 @@ function ProjectForm({
 
       <DialogFooter>
         <DialogClose asChild>
-          <Button type="button" variant="outline">Cancelar</Button>
+          <Button type="button" variant="outline">
+            Cancelar
+          </Button>
         </DialogClose>
-        <Button type="submit" form="project-form" disabled={submitting || galleryBusy}>
+        <Button
+          type="submit"
+          form="project-form"
+          disabled={submitting || galleryBusy}
+        >
           {submitting && <Spinner />}
           {submitting ? "Salvando..." : "Salvar projeto"}
         </Button>
@@ -813,16 +905,34 @@ function GalleryItem({
         <span className="text-xs font-medium text-white">{label}</span>
         <div className="flex gap-1">
           {onUp && (
-            <Button type="button" size="icon-sm" variant="secondary" disabled={disabled} onClick={onUp}>
+            <Button
+              type="button"
+              size="icon-sm"
+              variant="secondary"
+              disabled={disabled}
+              onClick={onUp}
+            >
               <ArrowUp />
             </Button>
           )}
           {onDown && (
-            <Button type="button" size="icon-sm" variant="secondary" disabled={disabled} onClick={onDown}>
+            <Button
+              type="button"
+              size="icon-sm"
+              variant="secondary"
+              disabled={disabled}
+              onClick={onDown}
+            >
               <ArrowDown />
             </Button>
           )}
-          <Button type="button" size="icon-sm" variant="destructive" disabled={disabled} onClick={onDelete}>
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="destructive"
+            disabled={disabled}
+            onClick={onDelete}
+          >
             <Trash2 />
           </Button>
         </div>
@@ -850,10 +960,10 @@ function DeleteProjectDialog({
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/projects/${project.id}`,
-        { method: "DELETE", credentials: "include" },
+        { method: "DELETE", credentials: "include" }
       )
       if (!response.ok) {
-        const result = await response.json() as { message?: string }
+        const result = (await response.json()) as { message?: string }
         setError(result.message ?? "Não foi possível excluir o projeto")
         return
       }
@@ -872,7 +982,8 @@ function DeleteProjectDialog({
         <DialogHeader>
           <DialogTitle>Excluir {project?.title}?</DialogTitle>
           <DialogDescription>
-            O projeto, suas relações e todos os arquivos enviados serão removidos.
+            O projeto, suas relações e todos os arquivos enviados serão
+            removidos.
           </DialogDescription>
         </DialogHeader>
         {error && (
@@ -882,7 +993,9 @@ function DeleteProjectDialog({
           </Alert>
         )}
         <DialogFooter>
-          <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
+          <DialogClose asChild>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
           <Button variant="destructive" onClick={remove} disabled={deleting}>
             {deleting && <Spinner />}
             {deleting ? "Excluindo..." : "Excluir projeto"}
@@ -895,12 +1008,26 @@ function DeleteProjectDialog({
 
 function StatusBadge({ status }: { status: PublicationStatus }) {
   if (status === "PUBLISHED") {
-    return <Badge className="bg-emerald-500 text-white"><Eye />Publicado</Badge>
+    return (
+      <Badge className="bg-emerald-500 text-white">
+        <Eye />
+        Publicado
+      </Badge>
+    )
   }
   if (status === "ARCHIVED") {
-    return <Badge variant="secondary"><Archive />Arquivado</Badge>
+    return (
+      <Badge variant="secondary">
+        <Archive />
+        Arquivado
+      </Badge>
+    )
   }
-  return <Badge variant="outline" className="bg-background/90">Rascunho</Badge>
+  return (
+    <Badge variant="outline" className="bg-background/90">
+      Rascunho
+    </Badge>
+  )
 }
 
 function validateImage(file: File) {

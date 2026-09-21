@@ -1,60 +1,41 @@
+import type { EducationContract } from "../contracts/EducationContract.js";
+import type { EducationData } from "../dtos/education/EducationData.js";
 import { prisma } from "../infra/prisma/index.js";
+import type { PrismaTransactionClient } from "./index.js";
+export type { EducationData } from "../dtos/education/EducationData.js";
 
-export type EducationData = {
-  institution: string;
-  course: string;
-  degree: string | null;
-  description: string | null;
-  start_date: Date;
-  end_date: Date | null;
-  current: boolean;
-  sort_order: number;
-  published: boolean;
-};
-
-export class EducationRepository {
-  public education_id = "";
-  public data: EducationData = {
-    institution: "",
-    course: "",
-    degree: null,
-    description: null,
-    start_date: new Date(),
-    end_date: null,
-    current: false,
-    sort_order: 0,
-    published: true,
-  };
+export class EducationRepository implements EducationContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
   public listPublic() {
-    return prisma.education.findMany({
+    return this.prismaClient.education.findMany({
       where: { published: true },
-      orderBy: [ { sort_order: "asc" }, { start_date: "desc" } ],
+      orderBy: [{ sort_order: "asc" }, { start_date: "desc" }],
     });
   }
 
   public listAdmin() {
-    return prisma.education.findMany({
-      orderBy: [ { sort_order: "asc" }, { start_date: "desc" } ],
+    return this.prismaClient.education.findMany({
+      orderBy: [{ sort_order: "asc" }, { start_date: "desc" }],
     });
   }
 
-  public findById() {
-    return prisma.education.findUnique({ where: { id: this.education_id } });
+  public findById(input: { education_id: string }) {
+    return this.prismaClient.education.findUnique({ where: { id: input.education_id } });
   }
 
-  public create() {
-    return prisma.education.create({ data: this.data });
+  public create(input: { data: EducationData }) {
+    return this.prismaClient.education.create({ data: input.data });
   }
 
-  public update() {
-    return prisma.education.update({
-      where: { id: this.education_id },
-      data: this.data,
+  public update(input: { education_id: string; data: EducationData }) {
+    return this.prismaClient.education.update({
+      where: { id: input.education_id },
+      data: input.data,
     });
   }
 
-  public delete() {
-    return prisma.education.delete({ where: { id: this.education_id } });
+  public delete(input: { education_id: string }) {
+    return this.prismaClient.education.delete({ where: { id: input.education_id } });
   }
 }

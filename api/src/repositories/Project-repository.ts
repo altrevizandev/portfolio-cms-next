@@ -1,24 +1,8 @@
-import { prisma } from "../infra/prisma/index.js";
 import { PublicationStatus } from "../../prisma/generated/prisma/enums.js";
-
-export type ProjectData = {
-  thumbnail: string;
-  title: string;
-  slug: string;
-  description: string;
-  objective: string;
-  challenge: string | null;
-  status: PublicationStatus;
-  published_at: Date | null;
-  featured: boolean;
-  sort_order: number;
-};
-
-export type ProjectImageData = {
-  path: string;
-  alt_text: string | null;
-  sort_order: number;
-};
+import type { ProjectContract } from "../contracts/ProjectContract.js";
+import type { ProjectData, ProjectImageData } from "../dtos/project/ProjectData.js";
+import { prisma } from "../infra/prisma/index.js";
+export type { ProjectData, ProjectImageData } from "../dtos/project/ProjectData.js";
 
 const projectInclude = {
   images: {
@@ -30,145 +14,131 @@ const projectInclude = {
   },
 };
 
-export class ProjectRepository {
-  public project_id = "";
-  public image_id = "";
-  public slug = "";
-  public data: ProjectData = {
-    thumbnail: "",
-    title: "",
-    slug: "",
-    description: "",
-    objective: "",
-    challenge: null,
-    status: PublicationStatus.DRAFT,
-    published_at: null,
-    featured: false,
-    sort_order: 0,
-  };
-  public stack_ids: string[] = [];
-  public images: ProjectImageData[] = [];
+export class ProjectRepository implements ProjectContract {
+  constructor(private readonly prismaClient: typeof prisma = prisma) {}
 
   public async listPublished() {
-    return prisma.project.findMany({
+    return this.prismaClient.project.findMany({
       where: { status: PublicationStatus.PUBLISHED },
       include: projectInclude,
-      orderBy: [
-        { featured: "desc" },
-        { sort_order: "asc" },
-        { published_at: "desc" },
-      ],
+      orderBy: [{ featured: "desc" }, { sort_order: "asc" }, { published_at: "desc" }],
     });
   }
 
   public async listAdmin() {
-    return prisma.project.findMany({
+    return this.prismaClient.project.findMany({
       include: projectInclude,
-      orderBy: [
-        { sort_order: "asc" },
-        { created_at: "desc" },
-      ],
+      orderBy: [{ sort_order: "asc" }, { created_at: "desc" }],
     });
   }
 
-  public async findPublishedBySlug() {
-    return prisma.project.findFirst({
+  public async findPublishedBySlug(input: { slug: string }) {
+    return this.prismaClient.project.findFirst({
       where: {
-        slug: this.slug,
+        slug: input.slug,
         status: PublicationStatus.PUBLISHED,
       },
       include: projectInclude,
     });
   }
 
-  public async findById() {
-    return prisma.project.findUnique({
-      where: { id: this.project_id },
+  public async findById(input: { project_id: string }) {
+    return this.prismaClient.project.findUnique({
+      where: { id: input.project_id },
       include: projectInclude,
     });
   }
 
-  public async findBySlug() {
-    return prisma.project.findUnique({
-      where: { slug: this.slug },
+  public async findBySlug(input: { slug: string }) {
+    return this.prismaClient.project.findUnique({
+      where: { slug: input.slug },
       select: { id: true },
     });
   }
 
-  public async countStacks() {
-    return prisma.stack.count({
-      where: { id: { in: this.stack_ids } },
+  public async countStacks(input: { stack_ids: string[] }) {
+    return this.prismaClient.stack.count({
+      where: { id: { in: input.stack_ids } },
     });
   }
 
-  public async create() {
-    return prisma.project.create({
+  public async create(input: {
+    data: ProjectData;
+    stack_ids: string[];
+    images: ProjectImageData[];
+  }) {
+    return this.prismaClient.project.create({
       data: {
-        ...this.data,
+        ...input.data,
         stacks: {
-          create: this.stack_ids.map((stack_id) => ({
+          create: input.stack_ids.map((stack_id) => ({
             stack: { connect: { id: stack_id } },
           })),
         },
         images: {
-          create: this.images,
+          create: input.images,
         },
       },
       include: projectInclude,
     });
   }
 
-  public async update() {
-    return prisma.$transaction(async (transaction) => {
+  public async update(input: {
+    project_id: string;
+    data: ProjectData;
+    stack_ids: string[];
+    images: ProjectImageData[];
+  }) {
+    return this.prismaClient.$transaction(async (transaction) => {
       await transaction.projectStack.deleteMany({
-        where: { project_id: this.project_id },
+        where: { project_id: input.project_id },
       });
 
       await transaction.project.update({
-        where: { id: this.project_id },
+        where: { id: input.project_id },
         data: {
-          ...this.data,
+          ...input.data,
           stacks: {
-            create: this.stack_ids.map((stack_id) => ({
+            create: input.stack_ids.map((stack_id) => ({
               stack: { connect: { id: stack_id } },
             })),
           },
           images: {
-            create: this.images,
+            create: input.images,
           },
         },
       });
 
       return transaction.project.findUniqueOrThrow({
-        where: { id: this.project_id },
+        where: { id: input.project_id },
         include: projectInclude,
       });
     });
   }
 
-  public async delete() {
-    return prisma.project.delete({
-      where: { id: this.project_id },
+  public async delete(input: { project_id: string }) {
+    return this.prismaClient.project.delete({
+      where: { id: input.project_id },
     });
   }
 
-  public async findImageById() {
-    return prisma.projectImage.findFirst({
+  public async findImageById(input: { image_id: string; project_id: string }) {
+    return this.prismaClient.projectImage.findFirst({
       where: {
-        id: this.image_id,
-        project_id: this.project_id,
+        id: input.image_id,
+        project_id: input.project_id,
       },
     });
   }
 
-  public async deleteImage() {
-    return prisma.projectImage.delete({
-      where: { id: this.image_id },
+  public async deleteImage(input: { image_id: string }) {
+    return this.prismaClient.projectImage.delete({
+      where: { id: input.image_id },
     });
   }
 
-  public async reorderImages(imageIds: string[]) {
-    return prisma.$transaction(async (transaction) => {
+  public async reorderImages(input: { project_id: string }, imageIds: string[]) {
+    return this.prismaClient.$transaction(async (transaction) => {
       await Promise.all(
         imageIds.map((id) =>
           transaction.projectImage.update({
@@ -188,7 +158,7 @@ export class ProjectRepository {
       );
 
       return transaction.projectImage.findMany({
-        where: { project_id: this.project_id },
+        where: { project_id: input.project_id },
         orderBy: { sort_order: "asc" },
       });
     });

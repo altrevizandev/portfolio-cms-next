@@ -1,53 +1,52 @@
 import { createHash, randomBytes } from "node:crypto";
-import { AccountRepository } from "../../repositories/Account-repository.js";
-import { SendEmailService } from "../email/send-email-service.js";
-import { ResetPasswordTokenRepository } from "../../repositories/ResetPasswordToken-repository.js";
+import type { AccountContract } from "../../contracts/AccountContract.js";
+import type { MailContract } from "../../contracts/MailContract.js";
+import type { ResetPasswordTokenContract } from "../../contracts/ResetPasswordTokenContract.js";
+import type { SendResetPasswordLinkDTO } from "../../dtos/auth/SendResetPasswordLinkDTO.js";
 
 export class SendResetPasswordLinkService {
-  public email: string = "";
+  constructor(
+    private readonly accountRepository: AccountContract,
+    private readonly resetPasswordTokenRepository: ResetPasswordTokenContract,
+    private readonly sendEmailService: MailContract,
+  ) {}
 
-  private readonly accountRepository: AccountRepository;
-  private readonly resetPasswordTokenRepository: ResetPasswordTokenRepository;
-
-  constructor() {
-    this.accountRepository = new AccountRepository();
-    this.resetPasswordTokenRepository = new ResetPasswordTokenRepository();
-  }
-
-  public async execute() {
-    this.accountRepository.email = this.email;
-
-    const account = await this.accountRepository.findByEmail();
+  public async execute(input: SendResetPasswordLinkDTO) {
+    const account = await this.accountRepository.findByEmail({ email: input.email });
 
     if (!account) {
       return;
     }
-    
+
     const token = this.generateToken();
     const expiresInMinutes = 5;
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-    this.resetPasswordTokenRepository.account_id = account.id;
-    await this.resetPasswordTokenRepository.invalidateAccountResetPasswordTokens();
+    await this.resetPasswordTokenRepository.invalidateAccountResetPasswordTokens({
+      account_id: account.id,
+    });
 
-    this.resetPasswordTokenRepository.token_hash = createHash("sha256").update(token).digest("hex");
-    this.resetPasswordTokenRepository.expires_at = expiresAt;
-    await this.resetPasswordTokenRepository.create();
+    await this.resetPasswordTokenRepository.create({
+      account_id: account.id,
+      token_hash: createHash("sha256").update(token).digest("hex"),
+      expires_at: expiresAt,
+    });
 
-    const sendEmailService = new SendEmailService();
-    
-    sendEmailService.from = process.env.MAIL_FROM!;
-    sendEmailService.subject = "Redefinição de senha | Portfólio André Lucas Trevizan";
-    sendEmailService.to = this.email;
-    sendEmailService.template = "reset-password";
-    sendEmailService.templateData = {
-      account,
-      token,
-      portal_url: process.env.PORTAL_URL ?? "https://altrevizan.com.br",
-      expires_in_minutes: expiresInMinutes,
-    };
-
-    await sendEmailService.execute();
+    await this.sendEmailService.execute({
+      template: "reset-password",
+      html: "",
+      templateData: {
+        account,
+        token,
+        portal_url: process.env.PORTAL_URL ?? "https://altrevizan.com.br",
+        expires_in_minutes: expiresInMinutes,
+      },
+      from: process.env.MAIL_FROM!,
+      to: input.email,
+      replyTo: "",
+      subject: "Redefinição de senha | Portfólio André Lucas Trevizan",
+      attachments: [],
+    });
   }
 
   private generateToken() {

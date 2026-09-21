@@ -1549,6 +1549,8 @@ export const ProjectScalarFieldEnum = {
   slug: 'slug',
   description: 'description',
   objective: 'objective',
+  application_url: 'application_url',
+  is_public: 'is_public',
   challenge: 'challenge',
   status: 'status',
   published_at: 'published_at',

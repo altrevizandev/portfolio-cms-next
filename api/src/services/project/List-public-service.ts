@@ -1,7 +1,7 @@
-import { ProjectRepository } from "../../repositories/Project-repository.js";
+import type { ProjectContract } from "../../contracts/ProjectContract.js";
 
 export class ProjectPublicListService {
-  private readonly projectRepository = new ProjectRepository();
+  constructor(private readonly projectRepository: ProjectContract) {}
 
   public async execute() {
     return this.projectRepository.listPublished();

@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ProjectDeleteImageService } from "../../services/project/Delete-image-service.js";
+import { makeProjectDeleteImageService } from "../../factories/project/make-services.js";
 import { removeUploadedFile } from "../../utils/uploads.js";
 
 export type ProjectDeleteImageRequest = {
@@ -7,15 +7,13 @@ export type ProjectDeleteImageRequest = {
 };
 
 export class ProjectDeleteImageController {
-  private readonly service = new ProjectDeleteImageService();
+  private readonly service = makeProjectDeleteImageService();
 
-  public async handle(
-    request: FastifyRequest<ProjectDeleteImageRequest>,
-    reply: FastifyReply,
-  ) {
-    this.service.project_id = request.params.project_id;
-    this.service.image_id = request.params.image_id;
-    const path = await this.service.execute();
+  public async handle(request: FastifyRequest<ProjectDeleteImageRequest>, reply: FastifyReply) {
+    const path = await this.service.execute({
+      project_id: request.params.project_id,
+      image_id: request.params.image_id,
+    });
     await removeUploadedFile(path);
     return reply.code(204).send();
   }

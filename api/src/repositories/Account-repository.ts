@@ -1,25 +1,18 @@
-import { hash } from "bcryptjs";
+import type { AccountContract } from "../contracts/AccountContract.js";
+
 import { prisma } from "../infra/prisma/index.js";
 import type { PrismaTransactionClient } from "./index.js";
 
-export class AccountRepository {
-  public account_id: number = 0;
-  public name: string = "";
-  public email: string = "";
-  public password: string = "";
-  
-  constructor(
-    private readonly prismaClient: PrismaTransactionClient = prisma
-  ) {}
+export class AccountRepository implements AccountContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
-  public async create() {
-    let hashed_password = await hash(this.password, 12);
-
+  public async create(input: { password: string; name: string; email: string; role_id: number }) {
     const account = this.prismaClient.account.create({
       data: {
-        name: this.name,
-        email: this.email,
-        password: hashed_password
+        name: input.name,
+        email: input.email,
+        password: input.password,
+        account_roles: { create: { role_id: input.role_id } },
       },
       select: {
         id: true,
@@ -27,58 +20,52 @@ export class AccountRepository {
         email: true,
         created_at: true,
         updated_at: true,
-      }
+      },
     });
 
     return account;
   }
 
-  public async findById() {
+  public async findById(input: { account_id: number }) {
     const account = await this.prismaClient.account.findUnique({
-      where: { id: this.account_id }
+      where: { id: input.account_id },
     });
 
     return account;
   }
-  
-  public async findByEmail() {
+
+  public async findByEmail(input: { email: string }) {
     const account = await this.prismaClient.account.findFirst({
-      where: { email: this.email },
+      where: { email: input.email },
     });
 
     return account;
   }
 
-  public async getAccountDetails() {
+  public async getAccountDetails(input: { account_id: number }) {
     const details = await this.prismaClient.accountRoles.findFirst({
-      where: { account_id: this.account_id },
+      where: { account_id: input.account_id },
       include: {
         account: true,
-        role: true
-      }
+        role: true,
+      },
     });
 
     return details;
   }
 
-  public async deleteById() {
-    await this.prismaClient.accountRoles.deleteMany({
-      where: { account_id: this.account_id }
-    });
-
+  public async deleteById(input: { account_id: number }) {
     await this.prismaClient.account.delete({
-      where: { id: this.account_id }
+      where: { id: input.account_id },
     });
   }
 
-  public async changePassword() {
-    let hashed_password = await hash(this.password, 12);
-
+  public async changePassword(input: { password: string; account_id: number }) {
     const account = await this.prismaClient.account.update({
-      where: { id: this.account_id },
+      where: { id: input.account_id },
       data: {
-        password: hashed_password
-      }
+        password: input.password,
+      },
     });
 
     return account;
@@ -92,31 +79,33 @@ export class AccountRepository {
             id: true,
             name: true,
             email: true,
-            cnpj_root: true,
             created_at: true,
             updated_at: true,
-          }
+          },
         },
         role: true,
       },
       orderBy: {
         account: {
           name: "asc",
-        }
-      }
+        },
+      },
     });
 
     return accounts;
   }
 
-  public async update() {
+  public async update(input: { account_id: number; name: string; email: string; role_id: number }) {
     return await this.prismaClient.account.update({
-      where: { id: this.account_id },
+      where: { id: input.account_id },
       data: {
-        name: this.name,
-        email: this.email,
+        name: input.name,
+        email: input.email,
         updated_at: new Date(),
-      }
-    })
+        account_roles: {
+          updateMany: { where: { account_id: input.account_id }, data: { role_id: input.role_id } },
+        },
+      },
+    });
   }
 }

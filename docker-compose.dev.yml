@@ -51,30 +51,6 @@ services:
     networks:
       - internal
 
-  portfolio-web:
-    build:
-      context: ./web
-      target: dev
-    restart: unless-stopped
-    init: true
-    environment:
-      NODE_ENV: development
-      API_INTERNAL_URL: http://portfolio-api:3333
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3333}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
-      WATCHPACK_POLLING: ${CHOKIDAR_USEPOLLING:-true}
-    ports:
-      - "${WEB_PORT:-3000}:3000"
-    volumes:
-      - ./web:/usr/src/app
-      - web_node_modules:/usr/src/app/node_modules
-      - web_next_cache:/usr/src/app/.next
-    depends_on:
-      portfolio-api:
-        condition: service_healthy
-    networks:
-      - internal
-
 volumes:
   postgres_dev_data:
   api_node_modules:

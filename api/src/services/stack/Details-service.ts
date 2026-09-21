@@ -1,18 +1,13 @@
-import { StackRepository } from "../../repositories/Stack-repository.js";
+import type { StackContract } from "../../contracts/StackContract.js";
+import type { StackDetailsDTO } from "../../dtos/stack/StackDetailsDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class StackDetailsService {
-  public stack_id = "";
-  private readonly stackRepository: StackRepository;
+  constructor(private readonly stackRepository: StackContract) {}
 
-  constructor() {
-    this.stackRepository = new StackRepository();
-  }
-
-  public async execute() {
-    this.stackRepository.stack_id = this.stack_id;
-
-    const stack = await this.stackRepository.findById();
+  public async execute(input: StackDetailsDTO) {
+    const stack = await this.stackRepository.findById({ stack_id: input.stack_id });
 
     if (!stack) {
       throw new ApiError("Stack nao encontrada", 404);

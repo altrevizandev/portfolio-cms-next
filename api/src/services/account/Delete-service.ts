@@ -1,24 +1,18 @@
-import { AccountRepository } from "../../repositories/Account-repository.js";
+import type { AccountContract } from "../../contracts/AccountContract.js";
+import type { AccountDeleteDTO } from "../../dtos/account/AccountDeleteDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class AccountDeleteService {
-  public account_id: number = 0;
+  constructor(private readonly accountRepository: AccountContract) {}
 
-  private readonly accountRepository: AccountRepository;
-
-  constructor() {
-    this.accountRepository = new AccountRepository();
-  }
-
-  public async execute() {
-    this.accountRepository.account_id = this.account_id;
-
-    const accountExists = await this.accountRepository.findById();
+  public async execute(input: AccountDeleteDTO) {
+    const accountExists = await this.accountRepository.findById({ account_id: input.account_id });
 
     if (!accountExists) {
       throw new ApiError("Conta nao encontrada", 400);
     }
 
-    await this.accountRepository.deleteById();
+    await this.accountRepository.deleteById({ account_id: input.account_id });
   }
 }

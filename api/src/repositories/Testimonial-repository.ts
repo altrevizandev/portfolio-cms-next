@@ -1,39 +1,35 @@
 import { TestimonialStatus } from "../../prisma/generated/prisma/enums.js";
+import type { TestimonialContract } from "../contracts/TestimonialContract.js";
+import type { TestimonialData } from "../dtos/testimonial/TestimonialData.js";
 import { prisma } from "../infra/prisma/index.js";
+import type { PrismaTransactionClient } from "./index.js";
+export type { TestimonialData } from "../dtos/testimonial/TestimonialData.js";
 
-export type TestimonialData = {
-  author_name: string;
-  author_role: string | null;
-  company: string | null;
-  avatar: string | null;
-  content: string;
-};
-
-export class TestimonialRepository {
-  public testimonial_id = "";
+export class TestimonialRepository implements TestimonialContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
   listPublic() {
-    return prisma.testimonial.findMany({
+    return this.prismaClient.testimonial.findMany({
       where: { status: TestimonialStatus.APPROVED },
-      orderBy: [ { approved_at: "desc" }, { created_at: "desc" } ],
+      orderBy: [{ approved_at: "desc" }, { created_at: "desc" }],
     });
   }
 
   listAdmin() {
-    return prisma.testimonial.findMany({ orderBy: { created_at: "desc" } });
+    return this.prismaClient.testimonial.findMany({ orderBy: { created_at: "desc" } });
   }
 
-  findById() {
-    return prisma.testimonial.findUnique({ where: { id: this.testimonial_id } });
+  findById(input: { testimonial_id: string }) {
+    return this.prismaClient.testimonial.findUnique({ where: { id: input.testimonial_id } });
   }
 
   create(data: TestimonialData) {
-    return prisma.testimonial.create({ data });
+    return this.prismaClient.testimonial.create({ data });
   }
 
-  updateStatus(status: TestimonialStatus) {
-    return prisma.testimonial.update({
-      where: { id: this.testimonial_id },
+  updateStatus(input: { testimonial_id: string }, status: TestimonialStatus) {
+    return this.prismaClient.testimonial.update({
+      where: { id: input.testimonial_id },
       data: {
         status,
         approved_at: status === TestimonialStatus.APPROVED ? new Date() : null,
@@ -41,7 +37,7 @@ export class TestimonialRepository {
     });
   }
 
-  delete() {
-    return prisma.testimonial.delete({ where: { id: this.testimonial_id } });
+  delete(input: { testimonial_id: string }) {
+    return this.prismaClient.testimonial.delete({ where: { id: input.testimonial_id } });
   }
 }

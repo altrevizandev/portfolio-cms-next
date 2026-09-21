@@ -1,27 +1,21 @@
-import { AccountRoleRepository } from "../../repositories/AccountRoles-repository.js";
+import type { AccountRoleContract } from "../../contracts/AccountRoleContract.js";
+import type { AccountDetailsDTO } from "../../dtos/account/AccountDetailsDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class AccountDetailsService {
-  public account_id: number = 0;
-  private readonly accountRoleRepository: AccountRoleRepository;
+  constructor(private readonly accountRoleRepository: AccountRoleContract) {}
 
-  constructor() {
-    this.accountRoleRepository = new AccountRoleRepository();
-  }
-
-  public async execute() {
-    this.accountRoleRepository.account_id = this.account_id;
-
-    const dbData = await this.accountRoleRepository.findByAccountId();
+  public async execute(input: AccountDetailsDTO) {
+    const dbData = await this.accountRoleRepository.findByAccountId({
+      account_id: input.account_id,
+    });
 
     if (!dbData) {
       throw new ApiError("Conta não encontrada", 400);
     }
 
-    const {
-      account,
-      role
-    } = dbData;
+    const { account, role } = dbData;
 
     return {
       id: account.id,
@@ -30,6 +24,6 @@ export class AccountDetailsService {
       role: role.slug,
       created_at: account.created_at,
       updated_at: account.updated_at,
-    }
+    };
   }
 }

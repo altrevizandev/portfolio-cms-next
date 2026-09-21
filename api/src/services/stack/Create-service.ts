@@ -1,44 +1,32 @@
-import { StackRepository } from "../../repositories/Stack-repository.js";
+import type { StackContract } from "../../contracts/StackContract.js";
+import type { StackCreateDTO } from "../../dtos/stack/StackDTO.js";
+export type { StackInput } from "../../dtos/stack/StackDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 import { createSlug } from "../../utils/slug.js";
 
-export type StackInput = {
-  name: string;
-  slug?: string;
-  icon_slug?: string | null;
-  color?: string | null;
-  website?: string | null;
-};
-
 export class StackCreateService {
-  public data: StackInput = { name: "" };
-  private readonly stackRepository: StackRepository;
+  constructor(private readonly stackRepository: StackContract) {}
 
-  constructor() {
-    this.stackRepository = new StackRepository();
-  }
-
-  public async execute() {
-    const slug = createSlug(this.data.slug || this.data.name);
+  public async execute(input: StackCreateDTO) {
+    const slug = createSlug(input.data.slug || input.data.name);
 
     if (!slug) {
       throw new ApiError("Nao foi possivel gerar um slug valido", 400);
     }
 
-    this.stackRepository.slug = slug;
-
-    if (await this.stackRepository.findBySlug()) {
+    if (await this.stackRepository.findBySlug({ slug: slug })) {
       throw new ApiError("Ja existe uma stack com este slug", 409);
     }
 
-    this.stackRepository.data = {
-      name: this.data.name.trim(),
-      slug,
-      icon_slug: this.data.icon_slug?.trim() || null,
-      color: this.data.color?.toUpperCase() || null,
-      website: this.data.website?.trim() || null,
-    };
-
-    return this.stackRepository.create();
+    return this.stackRepository.create({
+      data: {
+        name: input.data.name.trim(),
+        slug,
+        icon_slug: input.data.icon_slug?.trim() || null,
+        color: input.data.color?.toUpperCase() || null,
+        website: input.data.website?.trim() || null,
+      },
+    });
   }
 }

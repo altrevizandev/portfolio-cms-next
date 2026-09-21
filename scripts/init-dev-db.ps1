@@ -4,7 +4,7 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $environmentFile = Join-Path $projectRoot ".env.development"
 $apiDirectory = Join-Path $projectRoot "api"
 
-Get-Content -LiteralPath $environmentFile | ForEach-Object {
+Get-Content -LiteralPath $environmentFile -Encoding UTF8 | ForEach-Object {
   if ($_ -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
     [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2], "Process")
   }

@@ -1,26 +1,22 @@
-import { AccountRepository } from "../../repositories/Account-repository.js";
+import { hash } from "bcryptjs";
+import type { AccountContract } from "../../contracts/AccountContract.js";
+import type { ChangePasswordDTO } from "../../dtos/auth/ChangePasswordDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class ChangePasswordService {
-  public password: string = "";
-  public account_id: number = 0;
-  private readonly accountRepository: AccountRepository;
+  constructor(private readonly accountRepository: AccountContract) {}
 
-  constructor() {
-    this.accountRepository = new AccountRepository();
-  }
-
-  public async execute() {
-    this.accountRepository.account_id = this.account_id;
-
-    const account = await this.accountRepository.findById();
+  public async execute(input: ChangePasswordDTO) {
+    const account = await this.accountRepository.findById({ account_id: input.account_id });
 
     if (!account) {
       throw new ApiError("Conta não encontrada", 500);
     }
 
-    this.accountRepository.password = this.password;
-
-    await this.accountRepository.changePassword();
+    await this.accountRepository.changePassword({
+      password: await hash(input.password, 12),
+      account_id: input.account_id,
+    });
   }
 }

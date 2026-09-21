@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ProjectUpdateService } from "../../services/project/Update-service.js";
+import { makeProjectUpdateService } from "../../factories/project/make-services.js";
 import { removeUploadedFile } from "../../utils/uploads.js";
 import { parseProjectMultipart } from "./multipart.js";
 
@@ -8,20 +8,18 @@ export type ProjectUpdateRequest = {
 };
 
 export class ProjectUpdateController {
-  private readonly service = new ProjectUpdateService();
+  private readonly service = makeProjectUpdateService();
 
-  public async handle(
-    request: FastifyRequest<ProjectUpdateRequest>,
-    reply: FastifyReply,
-  ) {
+  public async handle(request: FastifyRequest<ProjectUpdateRequest>, reply: FastifyReply) {
     let uploadedPaths: string[] = [];
 
     try {
       const parsed = await parseProjectMultipart(request, uploadedPaths);
-      this.service.project_id = request.params.project_id;
-      this.service.data = parsed.input;
 
-      const { project, replaced_thumbnail } = await this.service.execute();
+      const { project, replaced_thumbnail } = await this.service.execute({
+        project_id: request.params.project_id,
+        data: parsed.input,
+      });
 
       if (replaced_thumbnail) {
         await removeUploadedFile(replaced_thumbnail);

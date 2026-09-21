@@ -1,59 +1,44 @@
-import { AccountRepository } from "../../repositories/Account-repository.js";
-import { AccountRoleRepository } from "../../repositories/AccountRoles-repository.js";
-import { RoleRepository } from "../../repositories/Role-repository.js";
+import type { AccountContract } from "../../contracts/AccountContract.js";
+import type { AccountRoleContract } from "../../contracts/AccountRoleContract.js";
+import type { RoleContract } from "../../contracts/RoleContract.js";
+import type { AccountUpdateDTO } from "../../dtos/account/AccountUpdateDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
 
 export class AccountUpdateService {
-  public account_id: number = 0;
-  public name: string = "";
-  public email: string = "";
-  public role: string = "";
+  constructor(
+    private readonly accountRepository: AccountContract,
+    private readonly accountRoleRepository: AccountRoleContract,
+    private readonly roleRepository: RoleContract,
+  ) {}
 
-  private readonly accountRepository: AccountRepository;
-  private readonly accountRoleRepository: AccountRoleRepository;
-  private readonly roleRepository: RoleRepository;
+  public async execute(input: AccountUpdateDTO) {
+    const accountExists = await this.accountRepository.findById({ account_id: input.account_id });
 
-  constructor() {
-    this.accountRepository = new AccountRepository();
-    this.accountRoleRepository = new AccountRoleRepository();
-    this.roleRepository = new RoleRepository();
-  }
-
-  public async execute() {
-    this.accountRepository.account_id = this.account_id;
-    this.accountRepository.name = this.name;
-    this.accountRepository.email = this.email;
-
-    const accountExists = await this.accountRepository.findById();
-    
     if (!accountExists) {
       throw new ApiError("Conta não encontrada", 400);
     }
 
-    this.roleRepository.slug = this.role;
-
-    const role = await this.roleRepository.findBySlug();
+    const role = await this.roleRepository.findBySlug({ slug: input.role });
 
     if (!role) {
       throw new ApiError("Função não encontrada", 404);
     }
 
-    this.accountRoleRepository.account_id = this.account_id;
-    this.accountRoleRepository.role_id = role.id;
-
-    const account_role = await this.accountRoleRepository.findByAccountId();
+    const account_role = await this.accountRoleRepository.findByAccountId({
+      account_id: input.account_id,
+    });
 
     if (!account_role) {
       throw new ApiError("Nenhuma função encontrada para essa conta", 400);
     }
 
-    this.accountRoleRepository.account_role_id = account_role.id;
-
-    await this.accountRepository.update();
-
-    const {
-      account,
-    } = await this.accountRoleRepository.update();
+    const account = await this.accountRepository.update({
+      account_id: input.account_id,
+      name: input.name,
+      email: input.email,
+      role_id: role.id,
+    });
 
     return {
       id: account.id,
@@ -62,6 +47,6 @@ export class AccountUpdateService {
       role: role.slug,
       created_at: account.created_at,
       updated_at: account.updated_at,
-    }
+    };
   }
 }

@@ -1,41 +1,34 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { makeAccountUpdateService } from "../../factories/account/make-services.js";
 import { AccountUpdateService } from "../../services/account/Update-service.js";
 
 type AccountUpdateProps = {
-  account_id: number
-  name: string
-  email: string
-  role: string
-}
+  account_id: number;
+  name: string;
+  email: string;
+  role: string;
+};
 
 export type AccountUpdateRequest = {
-  Body: AccountUpdateProps
-}
+  Body: AccountUpdateProps;
+};
 
 export class AccountUpdateController {
   private readonly accountUpdateService: AccountUpdateService;
 
   constructor() {
-    this.accountUpdateService = new AccountUpdateService();
+    this.accountUpdateService = makeAccountUpdateService();
   }
 
-  public async handle(
-    request: FastifyRequest<AccountUpdateRequest>,
-    reply: FastifyReply
-  ) {
-    const {
-      account_id,
-      name,
-      email,
-      role
-    } = request.body;
+  public async handle(request: FastifyRequest<AccountUpdateRequest>, reply: FastifyReply) {
+    const { account_id, name, email, role } = request.body;
 
-    this.accountUpdateService.account_id = account_id;
-    this.accountUpdateService.name = name;
-    this.accountUpdateService.email = email;
-    this.accountUpdateService.role = role;
-
-    const account = await this.accountUpdateService.execute();
+    const account = await this.accountUpdateService.execute({
+      account_id: account_id,
+      name: name,
+      email: email,
+      role: role,
+    });
 
     return reply.code(200).send({ account });
   }

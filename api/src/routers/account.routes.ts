@@ -43,7 +43,6 @@ export async function AccountRoutes(
               id: z.number(),
               name: z.string(),
               email: z.string(),
-              cnpj_root: z.string(),
               created_at: z.date(),
               updated_at: z.date(),
             })

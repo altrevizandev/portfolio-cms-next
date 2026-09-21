@@ -1,24 +1,22 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
+import { makeHomepageUpsertService } from "../../factories/homepage/make-services.js";
 import { HomepageUpsertService } from "../../services/homepage/Upsert-service.js";
 import { ApiError } from "../../utils/ApiError.js";
-import {
-  removeUploadedFile,
-  saveImageUpload,
-} from "../../utils/uploads.js";
+import { removeUploadedFile, saveImageUpload } from "../../utils/uploads.js";
 
 const nullableText = z.preprocess(
-  (value) => value === "" ? null : value,
+  (value) => (value === "" ? null : value),
   z.string().trim().nullable().optional(),
 );
 
 const nullableEmail = z.preprocess(
-  (value) => value === "" ? null : value,
+  (value) => (value === "" ? null : value),
   z.email("E-mail invalido").nullable().optional(),
 );
 
 const nullableUrl = z.preprocess(
-  (value) => value === "" ? null : value,
+  (value) => (value === "" ? null : value),
   z.url("URL invalida").nullable().optional(),
 );
 
@@ -37,7 +35,7 @@ export class HomepageUpsertController {
   private readonly homepageUpsertService: HomepageUpsertService;
 
   constructor() {
-    this.homepageUpsertService = new HomepageUpsertService();
+    this.homepageUpsertService = makeHomepageUpsertService();
   }
 
   public async handle(request: FastifyRequest, reply: FastifyReply) {
@@ -55,10 +53,7 @@ export class HomepageUpsertController {
           continue;
         }
 
-        if (
-          part.fieldname !== "primary_photo" &&
-          part.fieldname !== "secondary_photo"
-        ) {
+        if (part.fieldname !== "primary_photo" && part.fieldname !== "secondary_photo") {
           part.file.resume();
           throw new ApiError(`Campo de arquivo invalido: ${part.fieldname}`, 400);
         }
@@ -68,10 +63,7 @@ export class HomepageUpsertController {
           throw new ApiError(`A imagem ${part.fieldname} foi enviada mais de uma vez`, 400);
         }
 
-        uploadedPhotos[part.fieldname] = await saveImageUpload(
-          part,
-          "homepage",
-        );
+        uploadedPhotos[part.fieldname] = await saveImageUpload(part, "homepage");
       }
 
       const parsedFields = HomepageFieldsSchema.safeParse(fields);
@@ -83,26 +75,23 @@ export class HomepageUpsertController {
         );
       }
 
-      this.homepageUpsertService.data = {
-        headline: parsedFields.data.headline,
-        subheadline: parsedFields.data.subheadline ?? null,
-        biography: parsedFields.data.biography,
-        email: parsedFields.data.email ?? null,
-        github_url: parsedFields.data.github_url ?? null,
-        linkedin_url: parsedFields.data.linkedin_url ?? null,
-        ...uploadedPhotos,
-      };
-
-      const { homepage, replaced_photos } =
-        await this.homepageUpsertService.execute();
+      const { homepage, replaced_photos } = await this.homepageUpsertService.execute({
+        data: {
+          headline: parsedFields.data.headline,
+          subheadline: parsedFields.data.subheadline ?? null,
+          biography: parsedFields.data.biography,
+          email: parsedFields.data.email ?? null,
+          github_url: parsedFields.data.github_url ?? null,
+          linkedin_url: parsedFields.data.linkedin_url ?? null,
+          ...uploadedPhotos,
+        },
+      });
 
       await Promise.allSettled(replaced_photos.map(removeUploadedFile));
 
       return reply.code(200).send({ homepage });
     } catch (error) {
-      await Promise.allSettled(
-        Object.values(uploadedPhotos).map(removeUploadedFile),
-      );
+      await Promise.allSettled(Object.values(uploadedPhotos).map(removeUploadedFile));
       throw error;
     }
   }

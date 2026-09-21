@@ -14,6 +14,8 @@ const ProjectFieldsSchema = z.strictObject({
     (value) => value === "" ? null : value,
     z.string().trim().nullable().optional(),
   ),
+  is_public: z.enum(["true", "false"]).default("false").transform(value => value === "true"),
+  application_url: z.string().trim().optional(),
   status: z.enum(PublicationStatus).default(PublicationStatus.DRAFT),
   featured: z.preprocess(
     (value) => value === "true" || value === true,
@@ -105,6 +107,8 @@ export async function parseProjectMultipart(
   }
 
   const input: ProjectInput = {
+    is_public: parsed.data.is_public,
+    application_url: parsed.data.application_url ?? null,
     title: parsed.data.title,
     ...(parsed.data.slug && { slug: parsed.data.slug }),
     description: parsed.data.description,

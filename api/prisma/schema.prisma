@@ -172,6 +172,8 @@ model Project {
   slug         String            @unique
   description  String
   objective    String
+  application_url String?
+  is_public Boolean @default(false)
   challenge    String?
   status       PublicationStatus @default(DRAFT)
   published_at DateTime?

@@ -1,68 +1,55 @@
+import { hash } from "bcryptjs";
 import { randomInt } from "node:crypto";
-import { AccountRepository } from "../../repositories/Account-repository.js";
-import { AccountRoleRepository } from "../../repositories/AccountRoles-repository.js";
-import { RoleRepository } from "../../repositories/Role-repository.js";
+import type { AccountContract } from "../../contracts/AccountContract.js";
+import type { MailContract } from "../../contracts/MailContract.js";
+import type { RoleContract } from "../../contracts/RoleContract.js";
+import type { CreateAccountDTO } from "../../dtos/account/CreateAccountDTO.js";
+
 import { ApiError } from "../../utils/ApiError.js";
-import { SendEmailService } from "../email/send-email-service.js";
 
 export class CreateAccountService {
-  public name: string = "";
-  public email: string = "";
-  public role: string = "";
-  private password: string = "";
+  constructor(
+    private readonly accountRepository: AccountContract,
 
-  private readonly accountRepository: AccountRepository;
-  private readonly accountRoleRepository: AccountRoleRepository;
-  private readonly roleRepository: RoleRepository;
+    private readonly roleRepository: RoleContract,
+    private readonly sendEmailService: MailContract,
+  ) {}
 
-  constructor() {
-    this.accountRepository = new AccountRepository();
-    this.accountRoleRepository = new AccountRoleRepository();
-    this.roleRepository = new RoleRepository();
-  }
-
-  public async execute() {
-    this.accountRepository.name = this.name;
-    this.accountRepository.email = this.email;
-
-    const accountExists = await this.accountRepository.findByEmail();
+  public async execute(input: CreateAccountDTO) {
+    const accountExists = await this.accountRepository.findByEmail({ email: input.email });
 
     if (accountExists) {
       throw new ApiError("Ja existe uma conta com esse e-mail cadastrado", 400);
     }
 
-    this.password = await this.generatePassword();
-
-    this.accountRepository.password = this.password;
-
-    const account = await this.accountRepository.create();
-
-    this.roleRepository.slug = this.role;
-
-    const role = await this.roleRepository.findBySlug();
+    const role = await this.roleRepository.findBySlug({ slug: input.role });
 
     if (!role) {
       throw new ApiError("Funcao nao encontrada", 404);
     }
 
-    this.accountRoleRepository.account_id = account.id;
-    this.accountRoleRepository.role_id = role.id;
+    const password = await this.generatePassword();
+    const account = await this.accountRepository.create({
+      name: input.name,
+      email: input.email,
+      password: await hash(password, 12),
+      role_id: role.id,
+    });
 
-    await this.accountRoleRepository.createAccountRole();
-
-    const sendEmailService = new SendEmailService();
-
-    sendEmailService.from = process.env.MAIL_FROM!;
-    sendEmailService.subject = "Bem-vindo ao CMS | Portfólio André Lucas Trevizan";
-    sendEmailService.to = this.email;
-    sendEmailService.template = "account-created";
-    sendEmailService.templateData = {
-      account,
-      password: this.password,
-      portal_url: process.env.PORTAL_URL ?? "https://altrevizan.com.br",
-    };
-
-    await sendEmailService.execute();
+    await this.sendEmailService.execute({
+      template: "account-created",
+      html: "",
+      templateData: {
+        account,
+        password: password,
+        portal_url: process.env.PORTAL_URL ?? "https://altrevizan.com.br",
+      },
+      from: process.env.MAIL_FROM!,
+      to: input.email,
+      replyTo: "",
+      subject: "Bem-vindo ao CMS | Portfólio André Lucas Trevizan",
+      attachments: [],
+    });
 
     return account;
   }

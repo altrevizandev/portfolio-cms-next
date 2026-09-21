@@ -6,11 +6,7 @@ import Image from "next/image"
 import type { ProjectImage } from "@/types/project"
 import { getProjectImageUrl } from "@/lib/project-images"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 export function ProjectGallery({
   images,
@@ -27,13 +23,12 @@ export function ProjectGallery({
 
   const previous = () =>
     setActiveIndex((current) => (current - 1 + images.length) % images.length)
-  const next = () =>
-    setActiveIndex((current) => (current + 1) % images.length)
+  const next = () => setActiveIndex((current) => (current + 1) % images.length)
 
   return (
     <>
       <div className="space-y-4">
-        <div className="group relative aspect-[16/9] overflow-hidden rounded-[1.75rem] border border-border/70 bg-muted shadow-2xl shadow-primary/5">
+        <div className="group relative aspect-[16/9] overflow-hidden rounded-sm border border-border bg-muted">
           <Image
             src={getProjectImageUrl(active.path)!}
             alt={active.alt_text ?? `${projectTitle} — tela ${activeIndex + 1}`}
@@ -65,7 +60,8 @@ export function ProjectGallery({
                 variant="secondary"
                 size="icon"
                 type="button"
-                className="absolute top-1/2 left-4 z-20 size-11 -translate-y-1/2 rounded-full opacity-0 shadow-lg transition group-hover:opacity-100 focus:opacity-100"
+                className="absolute top-1/2 left-4 z-20 size-11 -translate-y-1/2 rounded-full opacity-100 shadow-lg transition focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label="Imagem anterior"
                 onClick={previous}
               >
                 <ChevronLeft />
@@ -75,7 +71,8 @@ export function ProjectGallery({
                 variant="secondary"
                 size="icon"
                 type="button"
-                className="absolute top-1/2 right-4 z-20 size-11 -translate-y-1/2 rounded-full opacity-0 shadow-lg transition group-hover:opacity-100 focus:opacity-100"
+                className="absolute top-1/2 right-4 z-20 size-11 -translate-y-1/2 rounded-full opacity-100 shadow-lg transition focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label="Próxima imagem"
                 onClick={next}
               >
                 <ChevronRight />
@@ -91,6 +88,8 @@ export function ProjectGallery({
               <button
                 key={image.id}
                 type="button"
+                aria-label={`Ver imagem ${index + 1} de ${projectTitle}`}
+                aria-pressed={index === activeIndex}
                 onClick={() => setActiveIndex(index)}
                 className={`relative aspect-[16/10] w-28 shrink-0 overflow-hidden rounded-xl border-2 transition sm:w-36 ${
                   index === activeIndex
@@ -132,6 +131,7 @@ export function ProjectGallery({
             size="icon"
             type="button"
             className="absolute top-4 right-4 z-20 size-11 rounded-full"
+            aria-label="Fechar galeria"
             onClick={() => setExpanded(false)}
           >
             <X />
@@ -143,6 +143,7 @@ export function ProjectGallery({
                 size="icon"
                 type="button"
                 className="absolute top-1/2 left-4 z-20 size-11 -translate-y-1/2 rounded-full"
+                aria-label="Imagem anterior"
                 onClick={previous}
               >
                 <ChevronLeft />
@@ -152,6 +153,7 @@ export function ProjectGallery({
                 size="icon"
                 type="button"
                 className="absolute top-1/2 right-4 z-20 size-11 -translate-y-1/2 rounded-full"
+                aria-label="Próxima imagem"
                 onClick={next}
               >
                 <ChevronRight />

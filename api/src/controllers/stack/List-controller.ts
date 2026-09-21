@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { StackListService } from "../../services/stack/List-service.js";
+import { makeStackListService } from "../../factories/stack/make-services.js";
 
 export class StackListController {
-  private readonly stackListService = new StackListService();
+  private readonly stackListService = makeStackListService();
 
   public async handle(_request: FastifyRequest, reply: FastifyReply) {
     const stacks = await this.stackListService.execute();

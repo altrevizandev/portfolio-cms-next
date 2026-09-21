@@ -1,44 +1,38 @@
+import type { ResetPasswordTokenContract } from "../contracts/ResetPasswordTokenContract.js";
 import { prisma } from "../infra/prisma/index.js";
 import type { PrismaTransactionClient } from "./index.js";
 
-export class ResetPasswordTokenRepository {
-  public password_reset_token_id: number = 0;
-  public account_id: number = 0;
-  public token_hash: string = "";
-  public expires_at: Date = new Date();
+export class ResetPasswordTokenRepository implements ResetPasswordTokenContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
-  constructor(
-    private readonly prismaClient: PrismaTransactionClient = prisma
-  ) {}
-
-  public async create() {
+  public async create(input: { account_id: number; token_hash: string; expires_at: Date }) {
     const resetPasswordToken = await this.prismaClient.passwordResetToken.create({
       data: {
-        account_id: this.account_id,
-        token_hash: this.token_hash,
-        expires_at: this.expires_at,
-      }
+        account_id: input.account_id,
+        token_hash: input.token_hash,
+        expires_at: input.expires_at,
+      },
     });
 
     return resetPasswordToken;
   }
 
-  public async invalidateAccountResetPasswordTokens() {
+  public async invalidateAccountResetPasswordTokens(input: { account_id: number }) {
     await this.prismaClient.passwordResetToken.updateMany({
       where: {
-        account_id: this.account_id,
+        account_id: input.account_id,
         used_at: null,
       },
       data: {
         used_at: new Date(),
-      }
+      },
     });
   }
 
-  public async findValidByTokenHash() {
+  public async findValidByTokenHash(input: { token_hash: string }) {
     return await this.prismaClient.passwordResetToken.findFirst({
       where: {
-        token_hash: this.token_hash,
+        token_hash: input.token_hash,
         used_at: null,
         expires_at: {
           gt: new Date(),
@@ -50,14 +44,14 @@ export class ResetPasswordTokenRepository {
     });
   }
 
-  public async markAsUsed() {
+  public async markAsUsed(input: { password_reset_token_id: number }) {
     await this.prismaClient.passwordResetToken.update({
       where: {
-        id: this.password_reset_token_id,
+        id: input.password_reset_token_id,
       },
       data: {
         used_at: new Date(),
-      }
+      },
     });
   }
 }

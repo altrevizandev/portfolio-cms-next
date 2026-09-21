@@ -75,6 +75,8 @@ const ProjectSchema = z.object({
   description: z.string(),
   objective: z.string(),
   challenge: z.string().nullable(),
+  is_public: z.boolean(),
+  application_url: z.string().nullable(),
   status: z.enum([ "DRAFT", "PUBLISHED", "ARCHIVED" ]),
   published_at: z.date().nullable(),
   featured: z.boolean(),

@@ -1,28 +1,11 @@
+import type { StackContract } from "../contracts/StackContract.js";
+import type { StackData } from "../dtos/stack/StackData.js";
 import { prisma } from "../infra/prisma/index.js";
 import type { PrismaTransactionClient } from "./index.js";
+export type { StackData } from "../dtos/stack/StackData.js";
 
-export type StackData = {
-  name: string;
-  slug: string;
-  icon_slug: string | null;
-  color: string | null;
-  website: string | null;
-};
-
-export class StackRepository {
-  public stack_id = "";
-  public slug = "";
-  public data: StackData = {
-    name: "",
-    slug: "",
-    icon_slug: null,
-    color: null,
-    website: null,
-  };
-
-  constructor(
-    private readonly prismaClient: PrismaTransactionClient = prisma,
-  ) {}
+export class StackRepository implements StackContract {
+  constructor(private readonly prismaClient: PrismaTransactionClient = prisma) {}
 
   public async list() {
     return this.prismaClient.stack.findMany({
@@ -30,40 +13,40 @@ export class StackRepository {
     });
   }
 
-  public async findById() {
+  public async findById(input: { stack_id: string }) {
     return this.prismaClient.stack.findUnique({
-      where: { id: this.stack_id },
+      where: { id: input.stack_id },
     });
   }
 
-  public async findBySlug() {
+  public async findBySlug(input: { slug: string }) {
     return this.prismaClient.stack.findUnique({
-      where: { slug: this.slug },
+      where: { slug: input.slug },
     });
   }
 
-  public async create() {
+  public async create(input: { data: StackData }) {
     return this.prismaClient.stack.create({
-      data: this.data,
+      data: input.data,
     });
   }
 
-  public async update() {
+  public async update(input: { stack_id: string; data: StackData }) {
     return this.prismaClient.stack.update({
-      where: { id: this.stack_id },
-      data: this.data,
+      where: { id: input.stack_id },
+      data: input.data,
     });
   }
 
-  public async countProjects() {
+  public async countProjects(input: { stack_id: string }) {
     return this.prismaClient.projectStack.count({
-      where: { stack_id: this.stack_id },
+      where: { stack_id: input.stack_id },
     });
   }
 
-  public async delete() {
+  public async delete(input: { stack_id: string }) {
     return this.prismaClient.stack.delete({
-      where: { id: this.stack_id },
+      where: { id: input.stack_id },
     });
   }
 }

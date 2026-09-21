@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ProjectReorderImagesService } from "../../services/project/Reorder-images-service.js";
+import { makeProjectReorderImagesService } from "../../factories/project/make-services.js";
 
 export type ProjectReorderImagesRequest = {
   Params: { project_id: string };
@@ -7,14 +7,16 @@ export type ProjectReorderImagesRequest = {
 };
 
 export class ProjectReorderImagesController {
-  private readonly service = new ProjectReorderImagesService();
+  private readonly service = makeProjectReorderImagesService();
 
-  public async handle(
-    request: FastifyRequest<ProjectReorderImagesRequest>,
-    reply: FastifyReply,
-  ) {
-    this.service.project_id = request.params.project_id;
-    this.service.image_ids = request.body.image_ids;
-    return reply.code(200).send({ images: await this.service.execute() });
+  public async handle(request: FastifyRequest<ProjectReorderImagesRequest>, reply: FastifyReply) {
+    return reply
+      .code(200)
+      .send({
+        images: await this.service.execute({
+          project_id: request.params.project_id,
+          image_ids: request.body.image_ids,
+        }),
+      });
   }
 }

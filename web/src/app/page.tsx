@@ -1,222 +1,211 @@
-import {
-  ArrowDownRight,
-  BriefcaseBusiness,
-  Code2,
-  Mail,
-} from "lucide-react"
+import { ArrowDown, ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { getHomepage, getHomepageImageUrl } from "@/lib/homepage"
-import { getPublicEducation, getPublicExperiences } from "@/lib/career"
 import { CareerTimeline } from "@/components/career/CareerTimeline"
+import { PortfolioFooter } from "@/components/portfolio/PortfolioFooter"
+import { ProjectList } from "@/components/portfolio/ProjectList"
+import { SectionHeading } from "@/components/portfolio/SectionHeading"
 import { TestimonialsSection } from "@/components/testimonials/TestimonialsSection"
-import { ContactDialog } from "@/components/contact/ContactDialog"
+import { getPublicEducation, getPublicExperiences } from "@/lib/career"
+import { getHomepage, getHomepageImageUrl } from "@/lib/homepage"
+import { getPublicProjects } from "@/lib/projects"
 import { getPublicTestimonials } from "@/lib/testimonials"
 
-const fallbackHomepage = {
-  headline: "Construo produtos digitais com propósito.",
-  subheadline: "Backend, frontend e tudo o que conecta uma boa ideia às pessoas.",
+const fallback = {
+  headline: "Desenvolvimento de software, do backend à interface.",
+  subheadline: "APIs, aplicações web e as integrações entre elas.",
   biography:
-    "Sou André Lucas Trevizan, desenvolvedor de software apaixonado por transformar problemas complexos em experiências simples, rápidas e bem construídas.",
+    "Sou André Lucas Trevizan, desenvolvedor de software. Trabalho com Node.js, Next.js e PostgreSQL. Aqui reúno meus projetos e um pouco da minha trajetória.",
   email: null,
   github_url: null,
   linkedin_url: null,
   primary_photo: null,
   secondary_photo: null,
 }
-
 export default async function Homepage() {
-  const [ homepageData, experiences, education, testimonials ] = await Promise.all([
-    getHomepage(),
-    getPublicExperiences(),
-    getPublicEducation(),
-    getPublicTestimonials(),
-  ])
-  const homepage = homepageData ?? fallbackHomepage
-  const primaryPhoto = getHomepageImageUrl(homepage.primary_photo)
+  const [data, projects, experiences, education, testimonials] =
+    await Promise.all([
+      getHomepage(),
+      getPublicProjects(),
+      getPublicExperiences(),
+      getPublicEducation(),
+      getPublicTestimonials(),
+    ])
+  const homepage = data ?? fallback
+  const photo = getHomepageImageUrl(homepage.primary_photo)
   const secondaryPhoto = getHomepageImageUrl(homepage.secondary_photo)
-  const biographyParagraphs = homepage.biography
+  const paragraphs = homepage.biography
     .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
+    .map((p) => p.trim())
     .filter(Boolean)
-
+  const selected = [...projects]
+    .sort((a, b) => Number(b.featured) - Number(a.featured))
+    .slice(0, 3)
   return (
-    <div className="relative isolate overflow-x-clip">
-      <div className="portfolio-grid pointer-events-none absolute inset-0 -z-20 opacity-50" />
-      <div className="pointer-events-none absolute -top-36 right-[-18rem] -z-10 size-[42rem] rounded-full bg-primary/20 blur-[140px]" />
-      <div className="pointer-events-none absolute bottom-[-18rem] left-[-16rem] -z-10 size-[38rem] rounded-full bg-secondary/15 blur-[150px]" />
-
-      <section
-        id="inicio"
-        className="mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-start gap-16 px-5 py-16 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:py-20"
-      >
-        <div className="flex flex-col items-start">
-          <div className="mb-8 flex items-center gap-3 text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
-            <span className="size-2 rounded-full bg-secondary shadow-[0_0_18px_var(--secondary)]" />
-            Disponível para criar
-          </div>
-
-          <h1 className="max-w-4xl text-[clamp(3.25rem,8vw,7.5rem)] leading-[0.88] font-bold tracking-[-0.065em]">
-            {homepage.headline}
-          </h1>
-
-          {homepage.subheadline && (
-            <p className="mt-8 max-w-xl text-justify text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              {homepage.subheadline}
-            </p>
-          )}
-
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Link
-              href="/projetos"
-              className="group inline-flex h-12 items-center gap-3 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-[0_16px_45px_-18px_var(--primary)] transition hover:-translate-y-0.5 hover:brightness-110"
-            >
-              Conheça meu trabalho
-              <ArrowDownRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
-            </Link>
-
-            <ContactDialog variant="outline" />
-          </div>
+    <div className="portfolio-surface">
+      <section id="inicio" className="portfolio-container portfolio-hero">
+        <div className="portfolio-hero-top portfolio-label">
+          <span>Portfólio pessoal</span>
+          <span>Software developer</span>
         </div>
-
-        <PhotoComposition
-          primaryPhoto={primaryPhoto}
-          secondaryPhoto={secondaryPhoto}
-        />
-      </section>
-
-      <section
-        id="sobre"
-        className="border-y border-border/60 bg-card/45 backdrop-blur-sm"
-      >
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[0.42fr_1fr] lg:px-10 lg:py-28">
+        <div className="portfolio-hero-layout">
           <div>
-            <span className="text-xs font-semibold tracking-[0.24em] text-primary uppercase">
-              Sobre mim
-            </span>
-            <p className="mt-5 font-heading text-2xl leading-tight font-semibold">
-              Código é ferramenta.
+            <h1>
+              André Lucas
               <br />
-              Impacto é o objetivo.
-            </p>
-          </div>
-
-          <div>
-            <div className="max-w-4xl">
-              <p className="text-justify font-heading text-2xl leading-[1.25] font-medium tracking-[-0.035em] sm:text-3xl lg:text-4xl">
-                {biographyParagraphs[0]}
+              <span>Trevizan</span>
+              <span className="portfolio-period">.</span>
+            </h1>
+            <p className="portfolio-hero-headline">{homepage.headline}</p>
+            {homepage.subheadline && (
+              <p className="portfolio-hero-description">
+                {homepage.subheadline}
               </p>
-              {biographyParagraphs.length > 1 && (
-                <div className="mt-8 max-w-3xl space-y-5 border-l border-primary/40 pl-5 text-justify text-base leading-relaxed text-muted-foreground sm:pl-7 sm:text-lg">
-                  {biographyParagraphs.slice(1).map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              )}
+            )}
+            <div className="portfolio-hero-links">
+              <Link href="#projetos" className="portfolio-button">
+                Explorar projetos <ArrowDown size={16} aria-hidden="true" />
+              </Link>
+              <Link href="#sobre" className="portfolio-text-link">
+                Um pouco sobre mim <ArrowUpRight size={16} aria-hidden="true" />
+              </Link>
             </div>
-
-            <div className="mt-12 flex flex-wrap gap-3">
+          </div>
+          {photo ? (
+            <figure className="portfolio-portrait">
+              <div>
+                <Image
+                  src={photo}
+                  alt="André Lucas Trevizan"
+                  fill
+                  sizes="(max-width: 760px) 70vw, 320px"
+                  className="object-cover"
+                  preload
+                />
+              </div>
+              <figcaption className="portfolio-label">
+                André Lucas Trevizan / Desenvolvedor
+              </figcaption>
+            </figure>
+          ) : (
+            <aside
+              className="portfolio-practice"
+              aria-label="Áreas de trabalho"
+            >
+              <span className="portfolio-label">Do servidor à tela</span>
+              <dl>
+                <div>
+                  <dt>01 / Backend</dt>
+                  <dd>
+                    Node.js <span>APIs e integrações</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>02 / Frontend</dt>
+                  <dd>
+                    Next.js <span>Aplicações web</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>03 / Dados</dt>
+                  <dd>
+                    PostgreSQL <span>Modelagem e persistência</span>
+                  </dd>
+                </div>
+              </dl>
+            </aside>
+          )}
+        </div>
+        <div className="portfolio-hero-bottom">
+          <span className="portfolio-label">
+            Node.js <span aria-hidden="true">/</span> Next.js{" "}
+            <span aria-hidden="true">/</span> PostgreSQL
+          </span>
+          <a href="#projetos" className="portfolio-label">
+            Trabalhos abaixo <ArrowDown size={14} aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+      <section id="projetos" className="portfolio-container portfolio-section">
+        <SectionHeading
+          index="01"
+          title="Projetos selecionados"
+          note="Código em prática"
+        />
+        {selected.length ? (
+          <ProjectList projects={selected} />
+        ) : (
+          <p className="portfolio-empty">
+            Estou organizando os projetos para compartilhar por aqui. Enquanto
+            isso, conheça um pouco do meu trabalho abaixo.
+          </p>
+        )}
+        {projects.length > 0 && (
+          <Link
+            href="/projetos"
+            className="portfolio-text-link portfolio-all-projects"
+          >
+            Todos os projetos{" "}
+            <span className="portfolio-label">
+              ({String(projects.length).padStart(2, "0")})
+            </span>
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+        )}
+      </section>
+      <section id="sobre" className="portfolio-container portfolio-section">
+        <SectionHeading index="02" title="Sobre mim" />
+        <div className="portfolio-about">
+          <div className="portfolio-about-aside">
+            {secondaryPhoto ? (
+              <div className="portfolio-secondary-photo">
+                <Image
+                  src={secondaryPhoto}
+                  alt="André Lucas Trevizan em seu dia a dia"
+                  fill
+                  sizes="(max-width: 760px) 70vw, 260px"
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <p className="portfolio-label">
+                A pessoa
+                <br />
+                por trás do código.
+              </p>
+            )}
+          </div>
+          <div className="portfolio-prose">
+            {paragraphs.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+            <div className="portfolio-socials">
               {homepage.github_url && (
-                <SocialLink href={homepage.github_url} label="GitHub">
-                  <Code2 className="size-4" />
-                </SocialLink>
+                <a href={homepage.github_url} target="_blank" rel="noreferrer">
+                  GitHub <ArrowUpRight size={15} aria-hidden="true" />
+                </a>
               )}
               {homepage.linkedin_url && (
-                <SocialLink href={homepage.linkedin_url} label="LinkedIn">
-                  <BriefcaseBusiness className="size-4" />
-                </SocialLink>
+                <a
+                  href={homepage.linkedin_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  LinkedIn <ArrowUpRight size={15} aria-hidden="true" />
+                </a>
               )}
               {homepage.email && (
-                <SocialLink href={`mailto:${homepage.email}`} label={homepage.email}>
-                  <Mail className="size-4" />
-                </SocialLink>
+                <a href={`mailto:${homepage.email}`}>
+                  E-mail <ArrowUpRight size={15} aria-hidden="true" />
+                </a>
               )}
             </div>
           </div>
         </div>
       </section>
-
       <CareerTimeline experiences={experiences} education={education} />
       <TestimonialsSection testimonials={testimonials} />
+      <PortfolioFooter />
     </div>
-  )
-}
-
-function PhotoComposition({
-  primaryPhoto,
-  secondaryPhoto,
-}: {
-  primaryPhoto: string | null
-  secondaryPhoto: string | null
-}) {
-  return (
-    <div className="relative mx-auto h-[32rem] w-full max-w-[34rem] sm:h-[38rem]">
-      <div className="absolute top-4 right-0 h-[78%] w-[72%] rotate-2 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-primary/25 via-card to-secondary/20 shadow-2xl">
-        {primaryPhoto ? (
-          <Image
-            src={primaryPhoto}
-            alt="André Lucas Trevizan"
-            fill
-            sizes="(max-width: 1024px) 72vw, 34vw"
-            className="object-cover"
-            preload
-          />
-        ) : (
-          <PhotoPlaceholder label="AT" />
-        )}
-      </div>
-
-      <div className="absolute bottom-2 left-0 h-[48%] w-[48%] -rotate-3 overflow-hidden rounded-[1.65rem] border-8 border-background bg-gradient-to-br from-secondary/30 via-card to-primary/20 shadow-2xl">
-        {secondaryPhoto ? (
-          <Image
-            src={secondaryPhoto}
-            alt="André Lucas Trevizan trabalhando"
-            fill
-            sizes="(max-width: 1024px) 48vw, 22vw"
-            className="object-cover"
-          />
-        ) : (
-          <PhotoPlaceholder label="DEV" />
-        )}
-      </div>
-
-      <div className="absolute right-3 bottom-0 rounded-full border border-border/60 bg-background/80 px-4 py-2 text-xs font-medium tracking-wide backdrop-blur">
-        Node.js · Next.js · PostgreSQL
-      </div>
-    </div>
-  )
-}
-
-function PhotoPlaceholder({ label }: { label: string }) {
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <span className="font-heading text-6xl font-bold tracking-[-0.08em] text-foreground/20">
-        {label}
-      </span>
-    </div>
-  )
-}
-
-function SocialLink({
-  href,
-  label,
-  children,
-}: {
-  href: string
-  label: string
-  children: React.ReactNode
-}) {
-  const external = href.startsWith("http")
-
-  return (
-    <a
-      href={href}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noreferrer" : undefined}
-      className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-background/70 px-4 text-sm font-medium transition hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary"
-    >
-      {children}
-      {label}
-    </a>
   )
 }

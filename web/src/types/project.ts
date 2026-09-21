@@ -26,6 +26,8 @@ export type Project = {
   slug: string
   description: string
   objective: string
+  is_public: boolean
+  application_url: string | null
   challenge: string | null
   status: PublicationStatus
   published_at: string | null

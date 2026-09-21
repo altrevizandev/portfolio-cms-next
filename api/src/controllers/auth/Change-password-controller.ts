@@ -1,33 +1,29 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { makeChangePasswordService } from "../../factories/auth/make-services.js";
 import { ChangePasswordService } from "../../services/auth/Change-password-service.js";
 
 type ChangePasswordProps = {
-  password: string
-}
+  password: string;
+};
 
 export type ChangePasswordRequest = {
-  Body: ChangePasswordProps
-}
+  Body: ChangePasswordProps;
+};
 
 export class ChangePasswordController {
   private readonly changePasswordService: ChangePasswordService;
- 
+
   constructor() {
-    this.changePasswordService = new ChangePasswordService();
+    this.changePasswordService = makeChangePasswordService();
   }
 
   public async handle(request: FastifyRequest<ChangePasswordRequest>, reply: FastifyReply) {
-    const {
-      password
-    } = request.body;
+    const { password } = request.body;
 
-    this.changePasswordService.account_id = request.user.sub;
-    this.changePasswordService.password = password;
-
-    await this.changePasswordService.execute();
+    await this.changePasswordService.execute({ account_id: request.user.sub, password: password });
 
     return reply.code(200).send({
-      message: "Senha alterada com sucesso"
+      message: "Senha alterada com sucesso",
     });
   }
 }

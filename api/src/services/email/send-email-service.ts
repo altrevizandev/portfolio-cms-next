@@ -1,6 +1,7 @@
-import { createTransport, type Transporter } from 'nodemailer';
-import { ApiError } from '../../utils/ApiError.js';
-import { renderEmailTemplate } from './render-template.js';
+import { createTransport, type Transporter } from "nodemailer";
+import type { MailContract, SendMailDTO } from "../../contracts/MailContract.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { renderEmailTemplate } from "./render-template.js";
 
 interface NodemailerError extends Error {
   code?: string;
@@ -10,20 +11,7 @@ interface NodemailerError extends Error {
   rejected?: string[];
 }
 
-export class SendEmailService {
-  public from: string = process.env.MAIL_FROM
-    || `André Lucas Trevizan <${process.env.MAIL_AUTH ?? ""}>`;
-  public to: string = "";
-  public subject: string = "";
-  public html: string = "";
-  public replyTo: string = "";
-  public attachments: Array<{
-    filename: string;
-    content: Buffer;
-    contentType: string;
-  }> = [];
-  public template: string = "";
-  public templateData: Record<string, unknown> = {};
+export class SendEmailService implements MailContract {
   private readonly transporter: Transporter;
 
   constructor() {
@@ -36,37 +24,52 @@ export class SendEmailService {
       maxMessages: 5,
       auth: {
         user: String(process.env.MAIL_AUTH),
-        pass: String(process.env.MAIL_PASS)
-      }
+        pass: String(process.env.MAIL_PASS),
+      },
     });
   }
 
-  public async execute() {
+  public async execute(input: SendMailDTO) {
     try {
-      if (this.template != "") {
-        this.html = await renderEmailTemplate(this.template, this.templateData);
-      }
+      const html = input.template
+        ? await renderEmailTemplate(input.template, input.templateData ?? {})
+        : (input.html ?? "");
 
       await this.transporter.sendMail({
-        from: this.from,
-        to: this.to,
-        replyTo: this.replyTo || undefined,
-        subject: this.subject,
-        html: this.html,
-        attachments: this.attachments,
+        from:
+          input.from ??
+          process.env.MAIL_FROM ??
+          `André Lucas Trevizan <${process.env.MAIL_AUTH ?? ""}>`,
+        to: input.to,
+        replyTo: input.replyTo || undefined,
+        subject: input.subject,
+        html,
+        attachments: input.attachments,
       });
     } catch (error: unknown) {
       const err = error as NodemailerError;
 
       switch (err.code) {
-        case 'ECONNECTION':
-          throw new ApiError(`Network Error: Could not connect to the SMTP server. Check host/port configuration. ${err.message}`, 500);
-        case 'EAUTH':
-          throw new ApiError(`Authentication Error: Invalid username, password, or expired OAuth2 token. ${err.message}`, 500);
-        case 'EENVELOPE':
-          throw new ApiError(`Envelope Error: Missing recipients or bad "from"/"to" formatting. ${err.message} Rejected addresses: ${err.rejected}`, 500);
-        case 'ESTARTTLS':
-          throw new ApiError(`TLS/SSL Error: Upgrade failed. If using a self-signed cert in dev, configure tls settings. ${err.message}`, 500);
+        case "ECONNECTION":
+          throw new ApiError(
+            `Network Error: Could not connect to the SMTP server. Check host/port configuration. ${err.message}`,
+            500,
+          );
+        case "EAUTH":
+          throw new ApiError(
+            `Authentication Error: Invalid username, password, or expired OAuth2 token. ${err.message}`,
+            500,
+          );
+        case "EENVELOPE":
+          throw new ApiError(
+            `Envelope Error: Missing recipients or bad "from"/"to" formatting. ${err.message} Rejected addresses: ${err.rejected}`,
+            500,
+          );
+        case "ESTARTTLS":
+          throw new ApiError(
+            `TLS/SSL Error: Upgrade failed. If using a self-signed cert in dev, configure tls settings. ${err.message}`,
+            500,
+          );
         default:
           throw new ApiError(`Falha ao enviar o e-mail. ${err.code} - ${err.message}`, 500);
       }
